@@ -43,8 +43,8 @@ def remove_background_and_clean_artifacts(image, tolerance=0.01, min_size=64):
     # Clean up artifacts: perform opening and closing operations
     # Opening (erosion followed by dilation) removes small objects
     # Closing (dilation followed by erosion) fills small holes
-    clean_mask = binary_opening(connected_bg_mask, selem=np.ones((3,3)))
-    clean_mask = binary_closing(clean_mask, selem=np.ones((3,3)))
+    clean_mask = binary_opening(connected_bg_mask, np.ones((3,3)))
+    clean_mask = binary_closing(clean_mask, np.ones((3,3)))
 
     # Remove small objects from the mask
     clean_mask = remove_small_objects(clean_mask, min_size=min_size)
