@@ -2,13 +2,20 @@ import argparse
 import requests
 import subprocess
 
+
+headers = {
+    'Cache-Control': 'no-cache, no-store, must-revalidate',
+    'Pragma': 'no-cache',
+    'Expires': '0'
+}
+
 def import_and_run_github_script(username, repo, script_path):
     # Construct the URL to the raw script on GitHub
     raw_url = f"https://raw.githubusercontent.com/{username}/{repo}/main/{script_path}"
 
     try:
         # Fetch the script content
-        response = requests.get(raw_url)
+        response = requests.get(raw_url, headers)
         response.raise_for_status()
         script_code = response.text
 
@@ -26,7 +33,7 @@ def get_scripts_in_folder(username, repo, folder_path):
 
     try:
         # Fetch the contents of the folder from GitHub API
-        response = requests.get(contents_url)
+        response = requests.get(contents_url, headers)
         response.raise_for_status()
         contents = response.json()
 
@@ -45,7 +52,7 @@ def pull_and_install(username, repo):
     pipfile_lock_url = f"https://raw.githubusercontent.com/{username}/{repo}/main/Pipfile.lock"
 
     for file_url in [pipfile_url, pipfile_lock_url]:
-        response = requests.get(file_url)
+        response = requests.get(file_url, headers)
         if response.status_code == 200:
             with open(file_url.split('/')[-1], 'w') as file:
                 file.write(response.text)
