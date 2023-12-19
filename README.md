@@ -25,18 +25,9 @@ Make sure you have Python installed, along with any dependencies required by the
 
 You can use the scripts in this project to perform various image-related tasks. Here's a general outline of how to use them:
 
-1. Clone or download the Spritenator repository.
-2. Navigate to the `scripts` folder.
-
-   ```shell
-   cd spritenator/scripts
-   ```
-
-3. Run the desired script using Python.
-
-   ```shell
-   python script_name.py
-   ```
+1. Download run.py
+2. pip3 install requests
+3. python run.py
 
 Make sure to check the documentation in each script for detailed usage instructions.
 
