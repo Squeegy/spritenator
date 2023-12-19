@@ -1,6 +1,6 @@
 from skimage.morphology import binary_opening, binary_closing, remove_small_objects
 
-def remove_background_and_clean_artifacts(image_path, tolerance=0.01, min_size=64):
+def remove_background_and_clean_artifacts(image, tolerance=0.01, min_size=64):
     """
     Removes the background of an image using Euclidean distance in LAB color space, labeling,
     and cleans up artifacts such as thin lines and small islands of color.
@@ -11,7 +11,6 @@ def remove_background_and_clean_artifacts(image_path, tolerance=0.01, min_size=6
     :return: A PIL Image object with the background and artifacts removed.
     """
     # Load the image and convert it to RGBA (to add alpha channel)
-    image = Image.open(image_path).convert('RGBA')
     pixels = np.array(image)
 
     # Convert RGB to LAB for better color difference measurement
