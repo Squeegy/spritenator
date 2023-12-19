@@ -6,7 +6,8 @@ name = "pypi"
 [packages]
 requests = "*"
 scikit-image = "*"
-image = "*"
+numpy = "*"
+pillow = "*"
 
 [dev-packages]
 

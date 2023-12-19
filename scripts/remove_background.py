@@ -1,4 +1,8 @@
+import numpy as np
+from skimage.color import rgb2lab
+from skimage.measure import label
 from skimage.morphology import binary_opening, binary_closing, remove_small_objects
+from PIL import Image
 
 def remove_background_and_clean_artifacts(image, tolerance=0.01, min_size=64):
     """
