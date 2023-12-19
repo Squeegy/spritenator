@@ -6,8 +6,6 @@ Welcome to Spritenator, a project for managing and processing images using Pytho
 
 - [Installation](#installation)
 - [Usage](#usage)
-- [Scripts](#scripts)
-- [Gists](#gists)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -31,23 +29,6 @@ You can use the scripts in this project to perform various image-related tasks. 
 
 Make sure to check the documentation in each script for detailed usage instructions.
 
-## Scripts
-
-Below is a list of available scripts in the `scripts` folder:
-
-1. [Script 1](scripts/script1.py) - Description of what this script does.
-2. [Script 2](scripts/script2.py) - Description of what this script does.
-3. [Script 3](scripts/script3.py) - Description of what this script does.
-
-## Gists
-
-We keep track of individual functions and code snippets in Gists for better organization and sharing. Here are the Gists associated with this project:
-
-1. [Gist 1](link-to-gist1) - Description of the function/code snippet.
-2. [Gist 2](link-to-gist2) - Description of the function/code snippet.
-3. [Gist 3](link-to-gist3) - Description of the function/code snippet.
-
-Feel free to explore the Gists for specific functions or code examples.
 
 ## Contributing
 
