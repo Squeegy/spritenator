@@ -48,7 +48,7 @@ if __name__ == "__main__":
 
     # Import and run each script in the specified order
     for script_path in script_paths:
-        import_and_run_github_script(github_username, github_repo, f"{scripts_folder_path}/{script_path}")
+        import_and_run_github_script(github_username, github_repo, script_path)
 
     # Run the main script if it exists
     import_and_run_github_script(github_username, github_repo, "main.py")
