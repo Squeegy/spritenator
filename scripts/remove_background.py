@@ -17,6 +17,12 @@ def remove_background_and_clean_artifacts(image, tolerance=0.01, min_size=64):
     # Load the image and convert it to RGBA (to add alpha channel)
     pixels = np.array(image)
 
+    # Check if the image has an alpha channel
+    if pixels.shape[2] == 3:
+        # Add an alpha channel (fully opaque)
+        pixels = np.concatenate([pixels, np.full((pixels.shape[0], pixels.shape[1], 1), 255, dtype=np.uint8)], axis=-1)
+
+
     # Convert RGB to LAB for better color difference measurement
     lab_pixels = rgb2lab(pixels[:, :, :3] / 255.0)
 
