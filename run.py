@@ -1,4 +1,6 @@
+import argparse
 import requests
+import subprocess
 
 def import_and_run_github_script(username, repo, script_path):
     # Construct the URL to the raw script on GitHub
@@ -36,12 +38,33 @@ def get_scripts_in_folder(username, repo, folder_path):
     except requests.exceptions.RequestException as e:
         print(f"Error fetching folder contents from GitHub: {e}")
         return []
+    
+def pull_and_install(username, repo):
+    # Function to handle the --pull argument
+    pipfile_url = f"https://raw.githubusercontent.com/{username}/{repo}/main/Pipfile"
+    pipfile_lock_url = f"https://raw.githubusercontent.com/{username}/{repo}/main/Pipfile.lock"
+
+    for file_url in [pipfile_url, pipfile_lock_url]:
+        response = requests.get(file_url)
+        if response.status_code == 200:
+            with open(file_url.split('/')[-1], 'w') as file:
+                file.write(response.text)
+
+    subprocess.run(["pipenv", "install"], check=True)
 
 if __name__ == "__main__":
+    # Argument parser setup
+    parser = argparse.ArgumentParser(description="Run scripts from a GitHub repository.")
+    parser.add_argument("--pull", action="store_true", help="Download Pipfile and Pipfile.lock and run pipenv install")
+    args = parser.parse_args()
+
     # Replace these values with your GitHub username and repository name
     github_username = "Squeegy"
     github_repo = "spritenator"
     scripts_folder_path = "scripts"
+
+    if args.pull:
+        pull_and_install(github_username, github_repo)
 
     # Get a list of script paths in the "scripts" folder and subfolders
     script_paths = get_scripts_in_folder(github_username, github_repo, scripts_folder_path)
