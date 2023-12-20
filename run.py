@@ -22,7 +22,9 @@ def import_and_run_github_script(username, repo, script_path):
 
         # Execute the script
         exec(script_code, globals())
-
+        # Check if 'main' function exists in the executed script
+        if 'main' in globals() and callable(globals()['main']):
+            globals()['main']()
     except requests.exceptions.RequestException as e:
         print(f"Error fetching script from GitHub: {e}")
     except Exception as e:
@@ -70,8 +72,6 @@ def get_request(url):
     """
     try:
         response = requests.get(url, headers=headers)
-        if 'Cache-Control' in response.headers:
-            print("Cache-Control header is present")
         response.raise_for_status()  # Will raise an HTTPError if the HTTP request returned an unsuccessful status code
         return response
     except requests.exceptions.RequestException as e:
