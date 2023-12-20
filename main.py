@@ -57,5 +57,4 @@ def main():
         # Process the image in memory and save it to the "sprites" folder
         process_image(input_path)
 
-print("starting")
 main()

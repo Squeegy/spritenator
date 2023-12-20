@@ -18,10 +18,10 @@ def create_color_block(color, size=(50, 50)):
 def get_representative_background_color(pixels, tolerance=1):
     # Extract corner pixels (top-left, top-right, bottom-left, bottom-right)
     corner_pixels = np.array([
-        pixels[0, 0, :3],
-        pixels[0, -1, :3],
-        pixels[-1, 0, :3],
-        pixels[-1, -1, :3]
+        {pixel: pixels[0, 0, :3], position: (0,0)},
+        {pixel: pixels[0, -1, :3], position: (0,-1)},
+        {pixel: pixels[-1, 0, :3], position: (-1, 0)},
+        {pixel: pixels[-1, -1, :3], position: (-1,-1)},
     ])
 
     # Calculate mean and standard deviation
@@ -29,17 +29,17 @@ def get_representative_background_color(pixels, tolerance=1):
     std = np.std(corner_pixels, axis=0)
 
     # Filter out pixels that are outside the tolerance (mean ± tolerance * std)
-    valid_pixels = corner_pixels[np.all(np.abs(corner_pixels - mean) <= tolerance * std, axis=1)]
+    valid_pixels = corner_pixels[np.all(np.abs(corner_pixels.pixel - mean) <= tolerance * std, axis=1)]
 
     # Calculate the average color from the remaining pixels
     if valid_pixels.shape[0] > 0:
-        avg_color = np.mean(valid_pixels, axis=0)
+        avg_color = np.mean(map(lambda pix: pix.pixel, valid_pixels), axis=0)
     else:
         # Fallback to the original pixel at (0, 0) if no pixels are valid
-        print("FALLING BACK")
+        valid_pixels = [{pixel: pixels[0, 0, :3], position: (0,0)}]
         avg_color = pixels[0, 0, :3]
 
-    return avg_color
+    return avg_color, valid_pixels
 
 def remove_background_and_clean_artifacts(image, tolerance=0.01, min_size=64):
     """
@@ -64,7 +64,7 @@ def remove_background_and_clean_artifacts(image, tolerance=0.01, min_size=64):
     lab_pixels = rgb2lab(pixels[:, :, :3] / 255.0)
 
     # Get the average LAB color of the background
-    avg_bg_color_rgb = get_representative_background_color(pixels)
+    avg_bg_color_rgb, valid_pixels = get_representative_background_color(pixels)
     avg_bg_color_lab = rgb2lab(np.array([[avg_bg_color_rgb / 255.0]]))[0, 0, :]
 
     # Calculate the Euclidean distance from the average background color for all pixels in LAB space
@@ -79,7 +79,8 @@ def remove_background_and_clean_artifacts(image, tolerance=0.01, min_size=64):
 
     # Label the regions in the mask
     labeled_mask = label(background_mask, connectivity=1)
-    bg_label = labeled_mask[0, 0]
+
+    bg_label = labeled_mask[valid_pixels[0].position[0], valid_pixels[0].position[1]]
 
     # Create a new mask where only the connected background region is True
     connected_bg_mask = (labeled_mask == bg_label)
