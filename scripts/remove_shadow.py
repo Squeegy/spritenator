@@ -2,7 +2,7 @@ from PIL import Image
 import numpy as np
 import cv2
 
-def remove_shadow(pil_img, shadow_threshold=50, low_edge_threshold=50,  high_edge_threshold=100):
+def remove_shadow(pil_img, shadow_threshold=100, low_edge_threshold=50,  high_edge_threshold=100):
     # Convert Pillow image to OpenCV format in BGR
     open_cv_image_bgr = np.array(pil_img.convert('RGB'))[:, :, ::-1]
 
