@@ -2,7 +2,9 @@ from PIL import Image
 import numpy as np
 import cv2
 
-def remove_shadow(pil_img, shadow_threshold = 50):
+# Image needs to have shadows that are distinct enough from the outline of the image
+
+def remove_shadow(pil_img, shadow_threshold = 80):
     # Load the image with Pillow
 
     # Convert the Pillow image to an OpenCV image
