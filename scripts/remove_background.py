@@ -128,7 +128,7 @@ def isolate_object(img):
     mask = cv2.erode(mask, kernel, iterations=1)
 
     # Use flood fill to fill the background
-    flood_fill_mask = initial_mask.copy()
+    flood_fill_mask = mask.copy()
     h, w = flood_fill_mask.shape[:2]
     mask = np.zeros((h+2, w+2), np.uint8)
     cv2.floodFill(flood_fill_mask, mask, (0,0), 255)
