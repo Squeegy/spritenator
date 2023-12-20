@@ -41,7 +41,7 @@ def find_largest_divisor(number, max_divisor, fuzziness):
 def create_reduced_image(img, rect_width, rect_height):
     new_width = img.width // rect_width
     new_height = img.height // rect_height
-    new_img = Image.new('RGB', (new_width, new_height))
+    new_img = Image.new('RGBA', (new_width, new_height))
 
     for i in range(new_width):
         for j in range(new_height):
