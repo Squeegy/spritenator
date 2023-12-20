@@ -53,6 +53,5 @@ def main():
         # Process the image in memory and save it to the "sprites" folder
         process_image(input_path)
 
-if __name__ == "__main__":
-    print("starting")
-    main()
+print("starting")
+main()
