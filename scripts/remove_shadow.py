@@ -17,7 +17,7 @@ def remove_shadow(pil_img, shadow_threshold = 50):
 
     # Use the thresholded image to create an alpha channel
     # Where the shadow is, set alpha to 0 (transparent)
-    b, g, r = cv2.split(open_cv_image)
+    b, g, r, _ = cv2.split(open_cv_image)
     a = np.ones(b.shape, dtype=b.dtype) * 255  # Create a fully opaque alpha channel
     a[thresholded == 0] = 0  # Set alpha to 0 where the shadow is detected
 
