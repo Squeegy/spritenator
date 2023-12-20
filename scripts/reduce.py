@@ -1,7 +1,6 @@
 from PIL import Image
 
-def reduce_image_size(img_path):
-    img = Image.open(img_path)
+def reduce_image_size(img):
     original_avg_color = average_color(img)
     width, height = img.size
 
