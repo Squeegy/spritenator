@@ -25,7 +25,8 @@ def get_representative_background_color(pixels, tolerance=1):
     ]
 
     # Extract just the pixel values for calculations
-    pixel_values = np.array([p["pixel"] for p in corner_pixels])
+
+    pixel_values = np.array([p.pixel for p in corner_pixels])
 
     # Calculate mean and standard deviation of pixel values
     mean = np.mean(pixel_values, axis=0)
