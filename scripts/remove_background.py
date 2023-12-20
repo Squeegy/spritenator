@@ -115,18 +115,9 @@ def isolate_object(img):
 
     contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-    # Combine all contours into a single list of points
-    all_contours = [point for contour in contours for point in contour]
-
-    # Convert the list of points into a numpy array
-    all_contours_np = np.array(all_contours)
-
-    # Calculate the convex hull of the combined contours
-    hull = cv2.convexHull(all_contours_np)
-
-    # Create a mask for the convex hull
+    # Create a mask for all the contours
     mask = np.zeros_like(gray)
-    cv2.drawContours(mask, [hull], -1, 255, thickness=cv2.FILLED)
+    cv2.drawContours(mask, contours, -1, 255, thickness=cv2.FILLED)
 
     mask_rgba = cv2.cvtColor(mask, cv2.COLOR_GRAY2BGRA)
     mask_rgba[:, :, 3] = mask
