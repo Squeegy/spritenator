@@ -17,12 +17,12 @@ def create_color_block(color, size=(50, 50)):
 
 def get_representative_background_color(pixels, tolerance=1):
     # Extract corner pixels (top-left, top-right, bottom-left, bottom-right)
-    corner_pixels = np.array([
+    corner_pixels = [
         {pixel: pixels[0, 0, :3], position: (0,0)},
         {pixel: pixels[0, -1, :3], position: (0,-1)},
         {pixel: pixels[-1, 0, :3], position: (-1, 0)},
         {pixel: pixels[-1, -1, :3], position: (-1,-1)},
-    ])
+    ]
 
     # Extract just the pixel values for calculations
     pixel_values = np.array([p["pixel"] for p in corner_pixels])
