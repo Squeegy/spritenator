@@ -110,7 +110,7 @@ def remove_background_and_clean_artifacts(image, tolerance=0.01, min_size=64):
 
 def isolate_object(img):
     open_cv_image = np.array(img.convert('RGBA'))[:, :, ::-1]
-    gray = cv2.cvtColor(open_cv_image, cv2.COLOR_BGR2GRAY)
+    gray = cv2.cvtColor(open_cv_image.copy(), cv2.COLOR_BGR2GRAY)
     edges = cv2.Canny(gray, 100, 200)
 
     contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -150,7 +150,7 @@ def isolate_object(img):
     mask_rgba = cv2.cvtColor(object_mask, cv2.COLOR_GRAY2BGRA)
     mask_rgba[:, :, 3] = object_mask
 
-    result = cv2.bitwise_and(open_cv_image, mask_rgba)
+    result = cv2.bitwise_and(open_cv_image.copy(), mask_rgba)
     result_pil = Image.fromarray(cv2.cvtColor(result, cv2.COLOR_BGRA2RGBA))
     mask_pil = Image.fromarray(cv2.cvtColor(open_cv_image, cv2.COLOR_BGRA2RGBA))
 
