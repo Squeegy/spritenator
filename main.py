@@ -2,7 +2,7 @@ import os
 import shutil
 from PIL import Image
 import traceback
-from scripts import *
+import scripts.script1
 
 print("MAIN LOADED")
 
@@ -14,7 +14,7 @@ def process_image(image_path):
         img = Image.open(image_path)
 
         # Image processing code
-        img, block = scripts.remove_background_and_clean_artifacts(img, 0.05)
+        img, block = script1.remove_background_and_clean_artifacts(img, 0.05)
 
         # Create the output path within the "sprites" folder
         root, _ = os.path.splitext(image_path)  # Split the path and ignore the original extension
