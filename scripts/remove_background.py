@@ -131,7 +131,7 @@ def isolate_object(img):
     flood_fill_mask = mask.copy()
     h, w = flood_fill_mask.shape[:2]
     mask = np.zeros((h+2, w+2), np.uint8)
-    cv2.floodFill(flood_fill_mask, mask, (0,0), 255)
+    cv2.floodFill(cv2.bitwise_not(flood_fill_mask), mask, (0,0), 255)
 
     # Invert the flood-filled mask to isolate the object
     object_mask = cv2.bitwise_not(flood_fill_mask)
