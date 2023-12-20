@@ -115,11 +115,11 @@ def isolate_object(img):
 
     contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-    # Create an initial mask with just the contour edges
+    # Create an initial mask with contour edges
     initial_mask = np.zeros_like(gray)
     cv2.drawContours(initial_mask, contours, -1, 255, thickness=2)
 
-    # Define the kernel size for the morphological operations
+# Define the kernel size for the morphological operations
     kernel_size = 3
     kernel = np.ones((kernel_size, kernel_size), np.uint8)
 
@@ -131,16 +131,20 @@ def isolate_object(img):
     flood_fill_mask = mask.copy()
     # Invert the flood_fill_mask for the flood fill operation
     inverted_flood_fill_mask = cv2.bitwise_not(flood_fill_mask)
+    
+    # Invert the initial mask for the flood fill operation
+    inverted_initial_mask = cv2.bitwise_not(initial_mask)
 
-    # Create a mask that is 2 pixels larger than the source image
-    h, w = inverted_flood_fill_mask.shape[:2]
-    mask = np.zeros((h+2, w+2), np.uint8)
+    # Create a mask that is 2 pixels larger than the source image for flood fill
+    h, w = inverted_initial_mask.shape[:2]
+    flood_fill_mask = np.zeros((h+2, w+2), np.uint8)
 
-    # Apply flood fill
-    cv2.floodFill(inverted_flood_fill_mask, mask, (0,0), 255)
+    # Apply flood fill with gray color (128)
+    cv2.floodFill(inverted_initial_mask, flood_fill_mask, (0,0), 128)
 
-    # Invert the flood-filled mask to isolate the object
-    object_mask = cv2.bitwise_not(inverted_flood_fill_mask)
+    # Create a mask from the flood-filled image
+    # Areas that are not gray (128) are part of the object
+    object_mask = cv2.inRange(inverted_initial_mask, 1, 127)
 
     mask_rgba = cv2.cvtColor(object_mask, cv2.COLOR_GRAY2BGRA)
     mask_rgba[:, :, 3] = object_mask
