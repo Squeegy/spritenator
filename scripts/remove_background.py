@@ -18,10 +18,10 @@ def create_color_block(color, size=(50, 50)):
 def get_representative_background_color(pixels, tolerance=1):
     # Extract corner pixels (top-left, top-right, bottom-left, bottom-right)
     corner_pixels = [
-        {pixel: pixels[0, 0, :3], position: (0,0)},
-        {pixel: pixels[0, -1, :3], position: (0,-1)},
-        {pixel: pixels[-1, 0, :3], position: (-1, 0)},
-        {pixel: pixels[-1, -1, :3], position: (-1,-1)},
+        {"pixel": pixels[0, 0, :3], "position": (0,0)},
+        {"pixel": pixels[0, -1, :3], "position": (0,-1)},
+        {"pixel": pixels[-1, 0, :3], "position": (-1, 0)},
+        {"pixel": pixels[-1, -1, :3], "position": (-1,-1)},
     ]
 
     # Extract just the pixel values for calculations
@@ -42,7 +42,7 @@ def get_representative_background_color(pixels, tolerance=1):
         avg_color = np.mean(pixel_values, axis=0)
     else:
         # Fallback to the original pixel at (0, 0) if no pixels are valid
-        valid_pixels = [{pixel: pixels[0, 0, :3], position: (0,0)}]
+        valid_pixels = [{"pixel": pixels[0, 0, :3], "position": (0,0)}]
         avg_color = pixels[0, 0, :3]
 
     return avg_color, valid_pixels
