@@ -108,46 +108,25 @@ def remove_background_and_clean_artifacts(image, tolerance=0.01, min_size=64):
     # Return the new image and the color block
     return new_image, color_block
 
-def isolate_object(img):
-    # Convert Pillow image to OpenCV format in BGR
+def isolate_objects(img):
     open_cv_image = np.array(img.convert('RGBA'))[:, :, ::-1]
-
-    # Convert image to grayscale
     gray = cv2.cvtColor(open_cv_image, cv2.COLOR_BGR2GRAY)
-
-    # Detect edges
     edges = cv2.Canny(gray, 100, 200)
 
-    # Find contours
     contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    
-    # Assuming largest contour is our object of interest
-    # You can refine this logic to select the appropriate contour
-    largest_contour = max(contours, key=cv2.contourArea)
-    
-    # Create an image to draw the contours on
-    contour_image = np.zeros_like(gray)
 
-    # Draw all contours
-    cv2.drawContours(contour_image, contours, -1, (155), thickness=1)
-    cv2.drawContours(contour_image, largest_contour, -1, (255), thickness=3)
-    # Convert back to Pillow image
-    contour_pil = Image.fromarray(contour_image)
+    # Filter contours based on a size threshold
+    significant_contours = [cnt for cnt in contours if cv2.contourArea(cnt) > size_threshold]
 
-    # Create a mask for the object
+    # Create a mask for all significant contours
     mask = np.zeros_like(gray)
-    cv2.drawContours(mask, [largest_contour], -1, 255, thickness=cv2.FILLED)
+    cv2.drawContours(mask, significant_contours, -1, 255, thickness=cv2.FILLED)
 
-    # Create a 4-channel mask to match the original image
     mask_rgba = cv2.cvtColor(mask, cv2.COLOR_GRAY2BGRA)
-
-    # Set alpha channel: 255 (opaque) for the interior, 0 (transparent) for the exterior
     mask_rgba[:, :, 3] = mask
 
-    # Apply the mask to make exterior of the object transparent
     result = cv2.bitwise_and(open_cv_image, mask_rgba)
-
-    # Convert back to Pillow image in RGBA format
     result_pil = Image.fromarray(cv2.cvtColor(result, cv2.COLOR_BGRA2RGBA))
-    return result_pil, contour_pil
+
+    return result_pil
 
