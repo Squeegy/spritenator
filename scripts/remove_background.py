@@ -109,9 +109,10 @@ def remove_background_and_clean_artifacts(image, tolerance=0.01, min_size=64):
     return new_image, color_block
 
 def isolate_object(img):
-    open_cv_image = np.array(img)[:, :, ::-1]  # Convert to OpenCV format
+    # Convert Pillow image to OpenCV format in BGR
+    open_cv_image = np.array(img.convert('RGB'))[:, :, ::-1]
 
-    # Convert to grayscale
+    # Convert image to grayscale
     gray = cv2.cvtColor(open_cv_image, cv2.COLOR_BGR2GRAY)
 
     # Detect edges
@@ -120,7 +121,6 @@ def isolate_object(img):
     # Find contours
     contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-    # Sort or select the contour of interest based on some criteria, e.g., size, location, etc.
     # Assuming largest contour is our object of interest
     largest_contour = max(contours, key=cv2.contourArea)
 
@@ -128,13 +128,14 @@ def isolate_object(img):
     mask = np.zeros_like(gray)
     cv2.drawContours(mask, [largest_contour], -1, 255, thickness=cv2.FILLED)
 
-    # Convert mask to 4 channels
-    mask_rgba = cv2.cvtColor(mask, cv2.COLOR_GRAY2RGBA)
+    # Convert mask to a 4-channel image (to match open_cv_image)
+    mask_bgra = cv2.cvtColor(mask, cv2.COLOR_GRAY2BGRA)
 
     # Apply the mask to make outside of the object transparent
-    result = cv2.bitwise_and(open_cv_image, mask_rgba)
+    # Make sure both open_cv_image and mask_bgra have the same number of channels
+    result = cv2.bitwise_and(open_cv_image, mask_bgra)
 
-    # Convert back to Pillow image
+    # Convert back to Pillow image in RGBA format
     result_pil = Image.fromarray(cv2.cvtColor(result, cv2.COLOR_BGRA2RGBA))
     return result_pil
 
