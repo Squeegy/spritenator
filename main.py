@@ -47,10 +47,12 @@ def main():
 
     # Process each image using the imported scripts
     for image_file in image_files:
+        print("PROCESSING", image_file)
         input_path = image_file
 
         # Process the image in memory and save it to the "sprites" folder
         process_image(input_path)
 
 if __name__ == "__main__":
+    print("starting")
     main()
