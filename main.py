@@ -12,6 +12,8 @@ def process_image(image_path):
         img = remove_background_and_clean_artifacts(img)
 
         # Create the output path within the "sprites" folder
+        root, _ = os.path.splitext(image_path)  # Split the path and ignore the original extension
+        output_path = f"{root}.png"  # Append '.png' extension
         output_path = os.path.join("sprites", os.path.basename(image_path))
 
         # Save the processed image to the output folder
