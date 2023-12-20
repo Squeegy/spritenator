@@ -129,19 +129,25 @@ def isolate_object(img):
     debug_mask = mask.copy()
     # Use flood fill to fill the background
     flood_fill_mask = mask.copy()
-    h, w = flood_fill_mask.shape[:2]
+    # Invert the flood_fill_mask for the flood fill operation
+    inverted_flood_fill_mask = cv2.bitwise_not(flood_fill_mask)
+
+    # Create a mask that is 2 pixels larger than the source image
+    h, w = inverted_flood_fill_mask.shape[:2]
     mask = np.zeros((h+2, w+2), np.uint8)
-    cv2.floodFill(cv2.bitwise_not(flood_fill_mask), mask, (0,0), 255)
+
+    # Apply flood fill
+    cv2.floodFill(inverted_flood_fill_mask, mask, (0,0), 255)
 
     # Invert the flood-filled mask to isolate the object
-    object_mask = cv2.bitwise_not(flood_fill_mask)
+    object_mask = cv2.bitwise_not(inverted_flood_fill_mask)
 
     mask_rgba = cv2.cvtColor(object_mask, cv2.COLOR_GRAY2BGRA)
     mask_rgba[:, :, 3] = object_mask
 
     result = cv2.bitwise_and(open_cv_image, mask_rgba)
     result_pil = Image.fromarray(cv2.cvtColor(result, cv2.COLOR_BGRA2RGBA))
-    mask_pil = Image.fromarray(cv2.cvtColor(debug_mask, cv2.COLOR_BGRA2RGBA))
+    mask_pil = Image.fromarray(cv2.cvtColor(flood_fill_mask, cv2.COLOR_BGRA2RGBA))
 
     return result_pil, mask_pil
 
