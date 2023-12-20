@@ -22,7 +22,7 @@ def process_image(image_path):
 
         # Save the processed image to the output folder
         img.save(output_path)
-        block.save(os.path.join("sprites", os.path.basename(image_path) + ".BACKGROUND"))
+        block.save(os.path.join("sprites", "BACKGROUND" + os.path.basename(image_path)))
 
         print(f"Processed image saved: {output_path}")
 
