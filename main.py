@@ -4,6 +4,7 @@ from PIL import Image
 import traceback
 import scripts.remove_background
 import scripts.crop
+import scripts.reduce
 
 print("MAIN LOADED")
 
@@ -19,6 +20,9 @@ def process_image(image_path):
 
         # New cropping step
         img = scripts.crop.crop_transparency(img)
+
+        # Size reduction step
+        img = scripts.reduce.reduce_image_size(img)
 
         # Create the output path within the "sprites" folder
         root, _ = os.path.splitext(image_path)  # Split the path and ignore the original extension
