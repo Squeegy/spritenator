@@ -21,8 +21,7 @@ def remove_shadow(pil_img, shadow_threshold=50, edge_threshold=100):
     shadow_mask = cv2.bitwise_and(thresholded, thresholded, mask=~edges_dilated)
 
     # Create an alpha channel for transparency
-    b, g, r = cv2.split(open_cv_image_bgr)
-    a = np.ones(b.shape, dtype=b.dtype) * 255  # Fully opaque
+    b, g, r, a = cv2.split(open_cv_image_bgr)
     a[shadow_mask == 0] = 0  # Transparent where the shadow is detected
 
     # Merge channels including the new alpha
