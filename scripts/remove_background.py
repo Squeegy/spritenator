@@ -135,7 +135,7 @@ def isolate_object(img):
 
     result = cv2.bitwise_and(open_cv_image, mask_rgba)
     result_pil = Image.fromarray(cv2.cvtColor(result, cv2.COLOR_BGRA2RGBA))
-    mask_pil = Image.fromarray(cv2.cvtColor(mask, cv2.COLOR_BGRA2RGBA))
+    mask_pil = Image.fromarray(cv2.cvtColor(initial_mask, cv2.COLOR_BGRA2RGBA))
 
     return result_pil, mask_pil
 
