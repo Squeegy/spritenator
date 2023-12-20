@@ -62,7 +62,7 @@ def average_color(img):
     num_pixels = img.width * img.height
     return (r // num_pixels, g // num_pixels, b // num_pixels)
 
-def is_color_difference_significant(color1, color2, threshold=15):
+def is_color_difference_significant(color1, color2, threshold=2):
     # Calculate the Euclidean distance between colors
     distance = sum((a - b) ** 2 for a, b in zip(color1, color2)) ** 0.5
     return distance > threshold
