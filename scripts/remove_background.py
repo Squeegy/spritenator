@@ -127,11 +127,15 @@ def isolate_object(img):
     mask = cv2.dilate(initial_mask, kernel, iterations=1)
     mask = cv2.erode(mask, kernel, iterations=1)
 
-    # Now fill in the contours on the processed mask
-    cv2.drawContours(mask, contours, -1, 255, thickness=cv2.FILLED)
+    # Create a new mask to fill
+    filled_mask = np.zeros_like(gray)
 
-    mask_rgba = cv2.cvtColor(mask, cv2.COLOR_GRAY2BGRA)
-    mask_rgba[:, :, 3] = mask
+    # Flood fill or manually fill each contour
+    for contour in contours:
+        cv2.fillPoly(filled_mask, [contour], 255)
+
+    mask_rgba = cv2.cvtColor(filled_mask, cv2.COLOR_GRAY2BGRA)
+    mask_rgba[:, :, 3] = filled_mask
 
     result = cv2.bitwise_and(open_cv_image, mask_rgba)
     result_pil = Image.fromarray(cv2.cvtColor(result, cv2.COLOR_BGRA2RGBA))
