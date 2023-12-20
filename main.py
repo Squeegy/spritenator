@@ -13,7 +13,7 @@ def process_image(image_path):
         img = Image.open(image_path)
 
         # Image processing code
-        img = remove_background_and_clean_artifacts(img, 0.05)
+        img, block = remove_background_and_clean_artifacts(img, 0.05)
 
         # Create the output path within the "sprites" folder
         root, _ = os.path.splitext(image_path)  # Split the path and ignore the original extension
@@ -22,6 +22,7 @@ def process_image(image_path):
 
         # Save the processed image to the output folder
         img.save(output_path)
+        block.save(os.path.join("sprites", os.path.basename(image_path) + ".BACKGROUND"))
 
         print(f"Processed image saved: {output_path}")
 

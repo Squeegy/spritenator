@@ -4,6 +4,17 @@ from skimage.measure import label
 from skimage.morphology import binary_opening, binary_closing, remove_small_objects
 from PIL import Image
 
+def create_color_block(color, size=(50, 50)):
+    """
+    Creates an image block of a given color.
+
+    :param color: The color of the block (RGB format).
+    :param size: The size of the block (width, height).
+    :return: A PIL Image object filled with the specified color.
+    """
+    block = Image.new('RGB', size, color=tuple(color.astype(int)))
+    return block
+
 def get_representative_background_color(pixels, tolerance=0.05):
     # Extract corner pixels (top-left, top-right, bottom-left, bottom-right)
     corner_pixels = np.array([
@@ -87,4 +98,8 @@ def remove_background_and_clean_artifacts(image, tolerance=0.01, min_size=64):
     # Create a new image from the modified pixel array
     new_image = Image.fromarray(pixels)
 
-    return new_image
+    # Create a color block for the average background color
+    color_block = create_color_block(avg_bg_color_rgb)
+
+    # Return the new image and the color block
+    return new_image, color_block
