@@ -130,7 +130,6 @@ def isolate_object(img):
 
     # Convert mask to 4 channels
     mask_rgba = cv2.cvtColor(mask, cv2.COLOR_GRAY2RGBA)
-    mask_rgba[:, :, 3] = mask  # Set the alpha channel
 
     # Apply the mask to make outside of the object transparent
     result = cv2.bitwise_and(open_cv_image, mask_rgba)
@@ -138,3 +137,4 @@ def isolate_object(img):
     # Convert back to Pillow image
     result_pil = Image.fromarray(cv2.cvtColor(result, cv2.COLOR_BGRA2RGBA))
     return result_pil
+
