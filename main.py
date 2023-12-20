@@ -7,6 +7,7 @@ import scripts.remove_background
 import scripts.crop
 import scripts.reduce
 import scripts.enlarge
+import scripts.remove_shadow
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--debug', action='store_true')
@@ -28,6 +29,9 @@ def process_image(image_path):
         img, debug = scripts.remove_background.remove_background_and_clean_artifacts(img, 0.1)
         if args.debug: img.save(os.path.join("sprites", "BACKGROUND" + os.path.basename(image_path)))
         if args.debug: debug.save(os.path.join("sprites", "BACKGROUND-CANDIDATE" + os.path.basename(image_path)))
+
+        img = scripts.remove_shadow.remove_shadow(img)
+        if args.debug: img.save(os.path.join("sprites", "SHADOW-REMOVED" + os.path.basename(image_path)))
 
         # New cropping step
         img = scripts.crop.crop_transparency(img)
