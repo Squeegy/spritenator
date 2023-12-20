@@ -4,6 +4,31 @@ from skimage.measure import label
 from skimage.morphology import binary_opening, binary_closing, remove_small_objects
 from PIL import Image
 
+def get_representative_background_color(pixels, tolerance=0.05):
+    # Extract corner pixels (top-left, top-right, bottom-left, bottom-right)
+    corner_pixels = np.array([
+        pixels[0, 0, :3],
+        pixels[0, -1, :3],
+        pixels[-1, 0, :3],
+        pixels[-1, -1, :3]
+    ])
+
+    # Calculate mean and standard deviation
+    mean = np.mean(corner_pixels, axis=0)
+    std = np.std(corner_pixels, axis=0)
+
+    # Filter out pixels that are outside the tolerance (mean ± tolerance * std)
+    valid_pixels = corner_pixels[np.all(np.abs(corner_pixels - mean) <= tolerance * std, axis=1)]
+
+    # Calculate the average color from the remaining pixels
+    if valid_pixels.shape[0] > 0:
+        avg_color = np.mean(valid_pixels, axis=0)
+    else:
+        # Fallback to the original pixel at (0, 0) if no pixels are valid
+        avg_color = pixels[0, 0, :3]
+
+    return avg_color
+
 def remove_background_and_clean_artifacts(image, tolerance=0.01, min_size=64):
     """
     Removes the background of an image using Euclidean distance in LAB color space, labeling,
@@ -26,11 +51,12 @@ def remove_background_and_clean_artifacts(image, tolerance=0.01, min_size=64):
     # Convert RGB to LAB for better color difference measurement
     lab_pixels = rgb2lab(pixels[:, :, :3] / 255.0)
 
-    # Get the LAB color of the background pixel at (0, 0)
-    bg_color_lab = lab_pixels[0, 0, :]
+    # Get the average LAB color of the background
+    avg_bg_color_rgb = get_representative_background_color(pixels)
+    avg_bg_color_lab = rgb2lab(np.array([[avg_bg_color_rgb / 255.0]]))[0, 0, :]
 
-    # Calculate the Euclidean distance from the background color for all pixels in LAB space
-    euclidean_distances_lab = np.sqrt(np.sum((lab_pixels - bg_color_lab) ** 2, axis=-1))
+    # Calculate the Euclidean distance from the average background color for all pixels in LAB space
+    euclidean_distances_lab = np.sqrt(np.sum((lab_pixels - avg_bg_color_lab) ** 2, axis=-1))
 
     # Calculate the maximum Euclidean distance for the tolerance in LAB color space
     max_euclidean_distance_lab = np.sqrt(100**2 + 255**2 + 255**2)
