@@ -24,7 +24,7 @@ def process_image(image_path):
         output_path = os.path.join("sprites", os.path.basename(image_path))
 
         # Image processing code
-        img, debug = scripts.remove_background.remove_background_and_clean_artifacts(img, 0.05)
+        img, debug = scripts.remove_background.remove_background_and_clean_artifacts(img, 0.1)
         if args.debug: img.save(os.path.join("sprites", "BACKGROUND" + os.path.basename(image_path)))
         if args.debug: debug.save(os.path.join("sprites", "BACKGROUND-CANDIDATE" + os.path.basename(image_path)))
 
