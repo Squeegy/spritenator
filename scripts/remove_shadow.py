@@ -4,10 +4,10 @@ import cv2
 
 def remove_shadow(pil_img, shadow_threshold=50, edge_threshold=100):
     # Convert Pillow image to OpenCV format in BGR
-    open_cv_image_bgr = np.array(pil_img.convert('RGB'))[:, :, ::-1]
+    open_cv_image_bgr = np.array(pil_img)[:, :, ::-1]
 
     # Convert image to grayscale
-    gray = cv2.cvtColor(open_cv_image_bgr, cv2.COLOR_BGR2GRAY)
+    gray = cv2.cvtColor(open_cv_image_bgr, cv2.COLOR_BGRA2GRAY)
 
     # Detect edges (presumably including black or almost black outlines)
     edges = cv2.Canny(gray, edge_threshold, edge_threshold * 2)
@@ -21,7 +21,8 @@ def remove_shadow(pil_img, shadow_threshold=50, edge_threshold=100):
     shadow_mask = cv2.bitwise_and(thresholded, thresholded, mask=~edges_dilated)
 
     # Create an alpha channel for transparency
-    b, g, r, a = cv2.split(open_cv_image_bgr)
+    b, g, r = cv2.split(open_cv_image_bgr)
+    a = np.ones(b.shape, dtype=b.dtype) * 255  # Fully opaque
     a[shadow_mask == 0] = 0  # Transparent where the shadow is detected
 
     # Merge channels including the new alpha
