@@ -29,13 +29,13 @@ def process_image(image_path):
 
     except Exception as e:
         tb = traceback.extract_tb(e.__traceback__)
+
         filename, line_no, func, text = tb[0]
         # Log errors to a file called "error.out" in the "sprites" folder
         error_message = f"Error processing image '{image_path}': {str(e)}\n"
-        error_message += f"Error occurred in file: {filename}, line: {line_no}, function: {func}\n"
-        filename, line_no, func, text = tb[1]
-        error_message += f"Error occurred in file: {filename}, line: {line_no}, function: {func}\n"
-
+        for trace in tb:
+            filename, line_no, func, text = trace
+            error_message += f"Error occurred in file: {filename}, line: {line_no}, function: {func}\n"
 
         print(error_message)
         with open(os.path.join("sprites", "error.out"), "a") as error_file:
