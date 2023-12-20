@@ -36,6 +36,7 @@ def get_representative_background_color(pixels, tolerance=0.005):
         avg_color = np.mean(valid_pixels, axis=0)
     else:
         # Fallback to the original pixel at (0, 0) if no pixels are valid
+        print("FALLING BACK")
         avg_color = pixels[0, 0, :3]
 
     return avg_color
