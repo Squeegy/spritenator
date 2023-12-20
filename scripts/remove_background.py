@@ -15,7 +15,7 @@ def create_color_block(color, size=(50, 50)):
     block = Image.new('RGB', size, color=tuple(color.astype(int)))
     return block
 
-def get_representative_background_color(pixels, tolerance=30):  # Tolerance is a fixed value now
+def get_representative_background_color(pixels, tolerance=20):  # Tolerance is a fixed value now
     # Extract corner pixels
     corner_pixels = [
         {"pixel": pixels[0, 0, :3], "position": (0,0)},
