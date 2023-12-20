@@ -12,7 +12,7 @@ headers = {
 
 def import_and_run_github_script(username, repo, script_path):
     # Construct the URL to the raw script on GitHub
-    raw_url = f"https://raw.githubusercontent.com/{username}/{repo}/main/{script_path}"
+    raw_url = f"https://api.githubusercontent.com/{username}/{repo}/main/{script_path}?ref=main"
 
     try:
         # Fetch the script content
@@ -30,7 +30,7 @@ def import_and_run_github_script(username, repo, script_path):
 
 def get_scripts_in_folder(username, repo, folder_path):
     # Construct the URL to fetch the contents of the folder
-    contents_url = f"https://api.github.com/repos/{username}/{repo}/contents/{folder_path}"
+    contents_url = f"https://api.github.com/repos/{username}/{repo}/contents/{folder_path}?ref=main"
 
     try:
         # Fetch the contents of the folder from GitHub API
@@ -49,8 +49,8 @@ def get_scripts_in_folder(username, repo, folder_path):
     
 def pull_and_install(username, repo):
     # Function to handle the --pull argument
-    pipfile_url = f"https://raw.githubusercontent.com/{username}/{repo}/main/Pipfile"
-    pipfile_lock_url = f"https://raw.githubusercontent.com/{username}/{repo}/main/Pipfile.lock"
+    pipfile_url = f"https://api.githubusercontent.com/{username}/{repo}/main/Pipfile?ref=main"
+    pipfile_lock_url = f"https://api.githubusercontent.com/{username}/{repo}/main/Pipfile.lock?ref=main"
 
     for file_url in [pipfile_url, pipfile_lock_url]:
         response = get_request(file_url)
