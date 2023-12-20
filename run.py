@@ -3,6 +3,7 @@ import requests
 import subprocess
 import time
 import base64
+import json
 
 
 
@@ -19,64 +20,71 @@ def import_and_run_github_script(username, repo, script_path):
     try:
         # Fetch the script content
         response = get_request(raw_url)
-        response.raise_for_status()
-        script_code = response.text
 
         # Execute the script
-        exec(script_code, globals())
+        exec(response, globals())
     except requests.exceptions.RequestException as e:
         print(f"Error fetching script from GitHub: {e}")
     except Exception as e:
         print(f"Error executing script: {e}")
 
-def get_scripts_in_folder(username, repo, folder_path):
-    # Construct the URL to fetch the contents of the folder
-    contents_url = f"https://api.github.com/repos/{username}/{repo}/contents/{folder_path}?ref=main"
-
+def fetch_scripts(username, repo, path):
+    contents_url = f"https://api.github.com/repos/{username}/{repo}/contents/{path}?ref=main"
     try:
-        # Fetch the contents of the folder from GitHub API
         response = get_request(contents_url)
-        response.raise_for_status()
-        contents = response.json()
+        scripts = []
 
-        # Filter and extract script paths
-        script_paths = [item['path'] for item in contents if item['type'] == 'file' and item['path'].endswith('.py')]
+        for item in response:
+            if item['type'] == 'file' and item['path'].endswith('.py'):
+                scripts.append(item['path'])
+            elif item['type'] == 'dir':
+                scripts.extend(fetch_scripts(username, repo, item['path']))
 
-        return script_paths
+        return scripts
 
     except requests.exceptions.RequestException as e:
         print(f"Error fetching folder contents from GitHub: {e}")
         return []
+
+def get_scripts_in_folder(username, repo, folder_path):
+    return fetch_scripts(username, repo, folder_path)
     
 def pull_and_install(username, repo):
     # Function to handle the --pull argument
-    pipfile_url = f"https://api.github.com/repos/{username}/{repo}/contents/Pipfile?ref=main"
-    pipfile_lock_url = f"https://api.github.com/repos/{username}/{repo}/contents/Pipfile.lock?ref=main"
+    pipfile_url = f"https://api.github.com/repos/{username}/{repo}/contents/Pipfile"
+    pipfile_lock_url = f"https://api.github.com/repos/{username}/{repo}/contents/Pipfile.lock"
 
     for file_url in [pipfile_url, pipfile_lock_url]:
         response = get_request(file_url)
-        if response.status_code == 200:
+        if response is not None:
             with open(file_url.split('/')[-1], 'w') as file:
-                file.write(response.text)
+                file.write(response)
 
     subprocess.run(["pipenv", "install"], check=True)
 
 def get_request(url):
-    """
-    Makes a GET request to the specified URL with predefined headers.
-    Returns the response object.
-
-    :param url: URL to which the GET request is to be sent.
-    :return: requests.Response object
-    """
     try:
         response = requests.get(url, headers=headers)
-        response.raise_for_status()  # Will raise an HTTPError if the HTTP request returned an unsuccessful status code
-        script_code = base64.b64decode(response['content'])
-        return script_code
-    except requests.exceptions.RequestException as e:
-        print(f"Error making GET request to {url}: {e}")
-        return None
+        response.raise_for_status()  # Raises an HTTPError for bad requests
+
+        data = response.json()
+
+        # Check if 'content' key exists in response
+        if 'content' in data:
+            decoded_content = base64.b64decode(data['content']).decode('utf-8')
+            return decoded_content
+        else:
+            return data
+
+    except requests.exceptions.HTTPError as errh:
+        print(f"Http Error: {errh}")
+    except requests.exceptions.ConnectionError as errc:
+        print(f"Error Connecting: {errc}")
+    except requests.exceptions.Timeout as errt:
+        print(f"Timeout Error: {errt}")
+    except requests.exceptions.RequestException as err:
+        print(f"Request Error: {err}")
+
 
 if __name__ == "__main__":
     # Argument parser setup
