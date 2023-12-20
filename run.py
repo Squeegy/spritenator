@@ -12,7 +12,7 @@ headers = {
 
 def import_and_run_github_script(username, repo, script_path):
     # Construct the URL to the raw script on GitHub
-    raw_url = f"https://api.githubusercontent.com/{username}/{repo}/main/{script_path}?ref=main"
+    raw_url = f"https://api.github.com/{username}/{repo}/main/{script_path}?ref=main"
 
     try:
         # Fetch the script content
@@ -49,8 +49,8 @@ def get_scripts_in_folder(username, repo, folder_path):
     
 def pull_and_install(username, repo):
     # Function to handle the --pull argument
-    pipfile_url = f"https://api.githubusercontent.com/{username}/{repo}/main/Pipfile?ref=main"
-    pipfile_lock_url = f"https://api.githubusercontent.com/{username}/{repo}/main/Pipfile.lock?ref=main"
+    pipfile_url = f"https://api.github.com/{username}/{repo}/main/Pipfile?ref=main"
+    pipfile_lock_url = f"https://api.github.com/{username}/{repo}/main/Pipfile.lock?ref=main"
 
     for file_url in [pipfile_url, pipfile_lock_url]:
         response = get_request(file_url)
@@ -69,8 +69,7 @@ def get_request(url):
     :return: requests.Response object
     """
     try:
-        unique_url = f"{url}?nocache={int(time.time())}"
-        response = requests.get(unique_url, headers=headers)
+        response = requests.get(url, headers=headers)
         if 'Cache-Control' in response.headers:
             print("Cache-Control header is present")
         response.raise_for_status()  # Will raise an HTTPError if the HTTP request returned an unsuccessful status code
