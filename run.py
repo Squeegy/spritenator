@@ -2,6 +2,8 @@ import argparse
 import requests
 import subprocess
 import time
+import base64
+
 
 
 headers = {
@@ -70,7 +72,8 @@ def get_request(url):
     try:
         response = requests.get(url, headers=headers)
         response.raise_for_status()  # Will raise an HTTPError if the HTTP request returned an unsuccessful status code
-        return response
+        script_code = base64.b64decode(response['content'])
+        return script_code
     except requests.exceptions.RequestException as e:
         print(f"Error making GET request to {url}: {e}")
         return None
