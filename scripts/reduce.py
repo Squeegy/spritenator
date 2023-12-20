@@ -18,7 +18,6 @@ def reduce_image_size(img):
         rect_width //= 2
         rect_height //= 2
 
-    reduced_img.show()
     return reduced_img
 
 def create_reduced_image(img, rect_width, rect_height):
