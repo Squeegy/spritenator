@@ -115,6 +115,9 @@ def isolate_object(img):
 
     contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
+    image_area = open_cv_image.shape[0] * open_cv_image.shape[1]  # width * height
+    size_threshold = 0.005 * image_area
+
     # Filter contours based on a size threshold
     significant_contours = [cnt for cnt in contours if cv2.contourArea(cnt) > size_threshold]
 
