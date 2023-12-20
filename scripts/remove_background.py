@@ -117,7 +117,7 @@ def isolate_object(img):
 
     # Create an initial mask with just the contour edges
     initial_mask = np.zeros_like(gray)
-    cv2.drawContours(initial_mask, contours, -1, 255, thickness=1)
+    cv2.drawContours(initial_mask, contours, -1, 255, thickness=2)
 
     # Define the kernel size for the morphological operations
     kernel_size = 3
