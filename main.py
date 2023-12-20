@@ -29,9 +29,6 @@ def process_image(image_path):
         img = scripts.remove_background.isolate_object(img)
         if args.debug: img.save(os.path.join("sprites", "BACKGROUND" + os.path.basename(image_path)))
 
-        img = scripts.remove_shadow.remove_shadow(img)
-        if args.debug: img.save(os.path.join("sprites", "SHADOW-REMOVED" + os.path.basename(image_path)))
-
         # New cropping step
         img = scripts.crop.crop_transparency(img)
         if args.debug: img.save(os.path.join("sprites", "CROP" + os.path.basename(image_path)))
