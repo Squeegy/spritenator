@@ -15,8 +15,8 @@ def create_color_block(color, size=(50, 50)):
     block = Image.new('RGB', size, color=tuple(color.astype(int)))
     return block
 
-def get_representative_background_color(pixels, tolerance=.8):
-    # Extract corner pixels (top-left, top-right, bottom-left, bottom-right)
+def get_representative_background_color(pixels, tolerance=30):  # Tolerance is a fixed value now
+    # Extract corner pixels
     corner_pixels = [
         {"pixel": pixels[0, 0, :3], "position": (0,0)},
         {"pixel": pixels[0, -1, :3], "position": (0,-1)},
@@ -24,28 +24,23 @@ def get_representative_background_color(pixels, tolerance=.8):
         {"pixel": pixels[-1, -1, :3], "position": (-1,-1)},
     ]
 
-    # Extract just the pixel values for calculations
+    # Extract pixel values for calculations
     pixel_values = np.array([p["pixel"] for p in corner_pixels])
-
-    # Calculate mean and standard deviation of pixel values
     mean = np.mean(pixel_values, axis=0)
-    std = np.std(pixel_values, axis=0)
 
-    # Filter out pixels that are within the tolerance
-    valid_indices = np.all(np.abs(pixel_values - mean) <= tolerance * std, axis=1)
+    # Filter out pixels within the tolerance
+    valid_indices = np.all(np.abs(pixel_values - mean) <= tolerance, axis=1)  # Fixed tolerance
     valid_pixels = [corner_pixels[i] for i in range(len(corner_pixels)) if valid_indices[i]]
 
-
-    # Calculate the average color from the remaining pixels
+    # Calculate the average color
     if len(valid_pixels) > 0:
-        pixel_values = np.array([p["pixel"] for p in valid_pixels])
-        avg_color = np.mean(pixel_values, axis=0)
+        avg_color = np.mean([p["pixel"] for p in valid_pixels], axis=0)
     else:
-        # Fallback to the original pixel at (0, 0) if no pixels are valid
         valid_pixels = [{"pixel": pixels[0, 0, :3], "position": (0,0)}]
         avg_color = pixels[0, 0, :3]
 
     return avg_color, valid_pixels
+
 
 def remove_background_and_clean_artifacts(image, tolerance=0.01, min_size=64):
     """
