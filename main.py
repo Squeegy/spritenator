@@ -1,6 +1,7 @@
 import os
 import shutil
 from PIL import Image
+import traceback
 
 # Function to process images (replace this with your image processing logic)
 def process_image(image_path):
@@ -22,8 +23,13 @@ def process_image(image_path):
         print(f"Processed image saved: {output_path}")
 
     except Exception as e:
+        tb = traceback.extract_tb(e.__traceback__)
+        # Extract the line number from the last call in the traceback
+        filename, line_no, func, text = tb[-1]
         # Log errors to a file called "error.out" in the "sprites" folder
         error_message = f"Error processing image '{image_path}': {str(e)}"
+        error_message += f"Error occurred in file: {filename}, line: {line_no}, function: {func}\n"
+
         print(error_message)
         with open(os.path.join("sprites", "error.out"), "a") as error_file:
             error_file.write(error_message + "\n")
