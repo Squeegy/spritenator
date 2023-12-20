@@ -121,6 +121,15 @@ def isolate_object(img):
     # Find contours
     contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
+    # Create an image to draw the contours on
+    contour_image = np.zeros_like(gray)
+
+    # Draw all contours
+    cv2.drawContours(contour_image, contours, -1, (255), thickness=1)
+
+    # Convert back to Pillow image
+    contour_pil = Image.fromarray(contour_image)
+
     # Assuming largest contour is our object of interest
     # You can refine this logic to select the appropriate contour
     largest_contour = max(contours, key=cv2.contourArea)
@@ -140,5 +149,5 @@ def isolate_object(img):
 
     # Convert back to Pillow image in RGBA format
     result_pil = Image.fromarray(cv2.cvtColor(result, cv2.COLOR_BGRA2RGBA))
-    return result_pil
+    return result_pil, countour_image
 

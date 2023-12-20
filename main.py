@@ -26,8 +26,9 @@ def process_image(image_path):
         output_path = os.path.join("sprites", os.path.basename(image_path))
 
         # Image processing code
-        img = scripts.remove_background.isolate_object(img)
+        img, contours = scripts.remove_background.isolate_object(img)
         if args.debug: img.save(os.path.join("sprites", "BACKGROUND" + os.path.basename(image_path)))
+        if args.debug: contours.save(os.path.join("sprites", "CONTOURS" + os.path.basename(image_path)))
 
         # New cropping step
         img = scripts.crop.crop_transparency(img)
