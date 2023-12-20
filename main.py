@@ -3,6 +3,8 @@ import shutil
 from PIL import Image
 import traceback
 
+print("MAIN LOADED")
+
 # Function to process images (replace this with your image processing logic)
 def process_image(image_path):
     try:
