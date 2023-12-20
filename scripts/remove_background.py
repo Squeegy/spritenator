@@ -120,12 +120,12 @@ def isolate_object(img):
     cv2.drawContours(mask, contours, -1, 255, thickness=cv2.FILLED)
 
     # Define the kernel size for the morphological operations
-    kernel_size = 3
+    kernel_size = 5
     kernel = np.ones((kernel_size, kernel_size), np.uint8)
 
     # Perform dilation followed by erosion (closing)
-    mask = cv2.dilate(mask, kernel, iterations=1)
-    mask = cv2.erode(mask, kernel, iterations=1)
+    mask = cv2.dilate(mask, kernel, iterations=2)
+    mask = cv2.erode(mask, kernel, iterations=2)
 
     mask_rgba = cv2.cvtColor(mask, cv2.COLOR_GRAY2BGRA)
     mask_rgba[:, :, 3] = mask
