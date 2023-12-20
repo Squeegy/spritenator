@@ -15,7 +15,7 @@ def import_and_run_github_script(username, repo, script_path):
 
     try:
         # Fetch the script content
-        response = requests.get(raw_url, headers)
+        response = get_request(raw_url)
         response.raise_for_status()
         script_code = response.text
 
@@ -33,7 +33,7 @@ def get_scripts_in_folder(username, repo, folder_path):
 
     try:
         # Fetch the contents of the folder from GitHub API
-        response = requests.get(contents_url, headers)
+        response = get_request(contents_url)
         response.raise_for_status()
         contents = response.json()
 
@@ -52,12 +52,29 @@ def pull_and_install(username, repo):
     pipfile_lock_url = f"https://raw.githubusercontent.com/{username}/{repo}/main/Pipfile.lock"
 
     for file_url in [pipfile_url, pipfile_lock_url]:
-        response = requests.get(file_url, headers)
+        response = get_request(file_url)
         if response.status_code == 200:
             with open(file_url.split('/')[-1], 'w') as file:
                 file.write(response.text)
 
     subprocess.run(["pipenv", "install"], check=True)
+
+def get_request(url):
+    """
+    Makes a GET request to the specified URL with predefined headers.
+    Returns the response object.
+
+    :param url: URL to which the GET request is to be sent.
+    :return: requests.Response object
+    """
+    try:
+        unique_url = f"{url}?nocache={int(time.time())}"
+        response = requests.get(unique_url, headers=headers)
+        response.raise_for_status()  # Will raise an HTTPError if the HTTP request returned an unsuccessful status code
+        return response
+    except requests.exceptions.RequestException as e:
+        print(f"Error making GET request to {url}: {e}")
+        return None
 
 if __name__ == "__main__":
     # Argument parser setup
