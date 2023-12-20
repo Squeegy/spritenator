@@ -2,7 +2,7 @@ import os
 import shutil
 from PIL import Image
 import traceback
-import scripts.script1
+import scripts.remove_background
 
 print("MAIN LOADED")
 
