@@ -21,11 +21,22 @@ def reduce_image_size(img, fuzziness=0.9):
     return reduced_img
 
 def find_largest_divisor(number, max_divisor, fuzziness):
-    target = number * fuzziness
+    # Fuzziness tolerance (e.g., 5% of the number)
+    tolerance = number * (1 - fuzziness)
+
+    closest_divisor = 1
+    smallest_remainder = number
+
     for divisor in range(max_divisor - 1, 1, -1):
-        if number % divisor == 0 and number // divisor >= target:
-            return divisor
-    return 1  # In case no divisor is found, return 1
+        remainder = number % divisor
+
+        # Check if the remainder is within the tolerance range
+        if remainder <= tolerance:
+            if remainder < smallest_remainder:
+                closest_divisor = divisor
+                smallest_remainder = remainder
+
+    return closest_divisor
 
 def create_reduced_image(img, rect_width, rect_height):
     new_width = img.width // rect_width
