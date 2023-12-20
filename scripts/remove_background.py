@@ -25,7 +25,6 @@ def get_representative_background_color(pixels, tolerance=1):
     ]
 
     # Extract just the pixel values for calculations
-    print(corner_pixels)
     pixel_values = np.array([p["pixel"] for p in corner_pixels])
 
     # Calculate mean and standard deviation of pixel values
@@ -39,7 +38,7 @@ def get_representative_background_color(pixels, tolerance=1):
 
     # Calculate the average color from the remaining pixels
     if len(valid_pixels) > 0:
-        print(valid_pixels)
+        pixel_values = np.array([p["pixel"] for p in valid_pixels])
         avg_color = np.mean(map(lambda pix: pix.pixel, valid_pixels), axis=0)
     else:
         # Fallback to the original pixel at (0, 0) if no pixels are valid
