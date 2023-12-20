@@ -115,17 +115,20 @@ def isolate_object(img):
 
     contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-    # Create a mask for all the contours
-    mask = np.zeros_like(gray)
-    cv2.drawContours(mask, contours, -1, 255, thickness=cv2.FILLED)
+    # Create an initial mask with just the contour edges
+    initial_mask = np.zeros_like(gray)
+    cv2.drawContours(initial_mask, contours, -1, 255, thickness=1)
 
     # Define the kernel size for the morphological operations
-    kernel_size = 5
+    kernel_size = 3
     kernel = np.ones((kernel_size, kernel_size), np.uint8)
 
-    # Perform dilation followed by erosion (closing)
-    mask = cv2.dilate(mask, kernel, iterations=2)
-    mask = cv2.erode(mask, kernel, iterations=2)
+    # Perform dilation followed by erosion (closing) on the initial mask
+    mask = cv2.dilate(initial_mask, kernel, iterations=1)
+    mask = cv2.erode(mask, kernel, iterations=1)
+
+    # Now fill in the contours on the processed mask
+    cv2.drawContours(mask, contours, -1, 255, thickness=cv2.FILLED)
 
     mask_rgba = cv2.cvtColor(mask, cv2.COLOR_GRAY2BGRA)
     mask_rgba[:, :, 3] = mask
