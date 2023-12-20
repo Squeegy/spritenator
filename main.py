@@ -6,6 +6,7 @@ import argparse
 import scripts.remove_background
 import scripts.crop
 import scripts.reduce
+import scripts.enlarge
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--debug', action='store_true')
@@ -35,6 +36,9 @@ def process_image(image_path):
         # Size reduction step
         img = scripts.reduce.reduce_image_size(img)
         if args.debug: img.save(os.path.join("sprites", "REDUCE" + os.path.basename(image_path)))
+
+        # blow up the image so we can see the final result more clearly without needing to zoom in as much
+        if args.debug: scripts.enlarge.enlarge(img, 8).save(os.path.join("sprites", "ENLARGE" + os.path.basename(image_path)))
 
         # Save the processed image to the output folder
         img.save(output_path)
