@@ -149,5 +149,5 @@ def isolate_object(img):
 
     # Convert back to Pillow image in RGBA format
     result_pil = Image.fromarray(cv2.cvtColor(result, cv2.COLOR_BGRA2RGBA))
-    return result_pil, countour_image
+    return result_pil, contour_pil
 
