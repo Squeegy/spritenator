@@ -126,7 +126,7 @@ def isolate_object(img):
     # Perform dilation followed by erosion (closing) on the initial mask
     mask = cv2.dilate(initial_mask, kernel, iterations=1)
     mask = cv2.erode(mask, kernel, iterations=1)
-
+    debug_mask = mask.copy()
     # Use flood fill to fill the background
     flood_fill_mask = mask.copy()
     h, w = flood_fill_mask.shape[:2]
@@ -141,7 +141,7 @@ def isolate_object(img):
 
     result = cv2.bitwise_and(open_cv_image, mask_rgba)
     result_pil = Image.fromarray(cv2.cvtColor(result, cv2.COLOR_BGRA2RGBA))
-    mask_pil = Image.fromarray(cv2.cvtColor(mask, cv2.COLOR_BGRA2RGBA))
+    mask_pil = Image.fromarray(cv2.cvtColor(debug_mask, cv2.COLOR_BGRA2RGBA))
 
     return result_pil, mask_pil
 
