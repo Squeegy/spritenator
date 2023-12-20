@@ -108,7 +108,7 @@ def remove_background_and_clean_artifacts(image, tolerance=0.01, min_size=64):
     # Return the new image and the color block
     return new_image, color_block
 
-def isolate_objects(img):
+def isolate_object(img):
     open_cv_image = np.array(img.convert('RGBA'))[:, :, ::-1]
     gray = cv2.cvtColor(open_cv_image, cv2.COLOR_BGR2GRAY)
     edges = cv2.Canny(gray, 100, 200)
