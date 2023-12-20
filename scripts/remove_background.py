@@ -122,18 +122,21 @@ def isolate_object(img):
     contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
     # Assuming largest contour is our object of interest
+    # You can refine this logic to select the appropriate contour
     largest_contour = max(contours, key=cv2.contourArea)
 
     # Create a mask for the object
     mask = np.zeros_like(gray)
     cv2.drawContours(mask, [largest_contour], -1, 255, thickness=cv2.FILLED)
 
-    # Convert mask to a 4-channel image (to match open_cv_image)
-    mask_bgra = cv2.cvtColor(mask, cv2.COLOR_GRAY2BGRA)
+    # Create a 4-channel mask to match the original image
+    mask_rgba = cv2.cvtColor(mask, cv2.COLOR_GRAY2BGRA)
 
-    # Apply the mask to make outside of the object transparent
-    # Make sure both open_cv_image and mask_bgra have the same number of channels
-    result = cv2.bitwise_and(open_cv_image, mask_bgra)
+    # Set alpha channel: 255 (opaque) for the interior, 0 (transparent) for the exterior
+    mask_rgba[:, :, 3] = mask
+
+    # Apply the mask to make exterior of the object transparent
+    result = cv2.bitwise_and(open_cv_image, mask_rgba)
 
     # Convert back to Pillow image in RGBA format
     result_pil = Image.fromarray(cv2.cvtColor(result, cv2.COLOR_BGRA2RGBA))
