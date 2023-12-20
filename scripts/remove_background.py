@@ -38,6 +38,7 @@ def get_representative_background_color(pixels, tolerance=1):
 
     # Calculate the average color from the remaining pixels
     if valid_pixels.shape[0] > 0:
+        print(valid_pixels)
         avg_color = np.mean(map(lambda pix: pix.pixel, valid_pixels), axis=0)
     else:
         # Fallback to the original pixel at (0, 0) if no pixels are valid
