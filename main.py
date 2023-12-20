@@ -2,6 +2,7 @@ import os
 import shutil
 from PIL import Image
 import traceback
+from scripts import *
 
 print("MAIN LOADED")
 
