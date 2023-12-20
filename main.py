@@ -3,6 +3,7 @@ import shutil
 from PIL import Image
 import traceback
 import scripts.remove_background
+import scripts.crop
 
 print("MAIN LOADED")
 
@@ -15,6 +16,9 @@ def process_image(image_path):
 
         # Image processing code
         img, block = scripts.remove_background.remove_background_and_clean_artifacts(img, 0.05)
+
+        # New cropping step
+        img = scripts.crop.crop_transparency(img)
 
         # Create the output path within the "sprites" folder
         root, _ = os.path.splitext(image_path)  # Split the path and ignore the original extension
