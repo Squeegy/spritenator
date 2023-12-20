@@ -3,6 +3,7 @@ from skimage.color import rgb2lab
 from skimage.measure import label
 from skimage.morphology import binary_opening, binary_closing, remove_small_objects
 from PIL import Image
+import cv2
 
 def create_color_block(color, size=(50, 50)):
     """
@@ -106,3 +107,34 @@ def remove_background_and_clean_artifacts(image, tolerance=0.01, min_size=64):
 
     # Return the new image and the color block
     return new_image, color_block
+
+def isolate_object(img):
+    open_cv_image = np.array(img)[:, :, ::-1]  # Convert to OpenCV format
+
+    # Convert to grayscale
+    gray = cv2.cvtColor(open_cv_image, cv2.COLOR_BGR2GRAY)
+
+    # Detect edges
+    edges = cv2.Canny(gray, 100, 200)
+
+    # Find contours
+    contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+    # Sort or select the contour of interest based on some criteria, e.g., size, location, etc.
+    # Assuming largest contour is our object of interest
+    largest_contour = max(contours, key=cv2.contourArea)
+
+    # Create a mask for the object
+    mask = np.zeros_like(gray)
+    cv2.drawContours(mask, [largest_contour], -1, 255, thickness=cv2.FILLED)
+
+    # Convert mask to 4 channels
+    mask_rgba = cv2.cvtColor(mask, cv2.COLOR_GRAY2RGBA)
+    mask_rgba[:, :, 3] = mask  # Set the alpha channel
+
+    # Apply the mask to make outside of the object transparent
+    result = cv2.bitwise_and(open_cv_image, mask_rgba)
+
+    # Convert back to Pillow image
+    result_pil = Image.fromarray(cv2.cvtColor(result, cv2.COLOR_BGRA2RGBA))
+    return result_pil
