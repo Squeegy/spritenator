@@ -150,8 +150,15 @@ def isolate_object(img):
     mask_rgba = cv2.cvtColor(object_mask, cv2.COLOR_GRAY2BGRA)
     mask_rgba[:, :, 3] = object_mask
 
-    result = cv2.bitwise_and(open_cv_image.copy(), mask_rgba)
-    result_pil = Image.fromarray(cv2.cvtColor(result, cv2.COLOR_BGRA2RGBA))
+    # Apply the mask to the original image
+    # Ensure that open_cv_image is in BGRA format if it's not already
+    if open_cv_image.shape[2] == 3:
+        open_cv_image = cv2.cvtColor(open_cv_image, cv2.COLOR_BGR2BGRA)
+
+    result_bgra = cv2.bitwise_and(open_cv_image, mask_rgba)
+
+    # Convert the result to RGBA for PIL compatibility (if needed)
+    result_pil = Image.fromarray(cv2.cvtColor(result_bgra, cv2.COLOR_BGRA2RGBA))
     mask_pil = Image.fromarray(cv2.cvtColor(open_cv_image, cv2.COLOR_BGRA2RGBA))
 
     return result_pil, mask_pil
