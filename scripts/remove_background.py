@@ -131,7 +131,7 @@ def isolate_object(img):
     flood_fill_mask = mask.copy()
     # Invert the flood_fill_mask for the flood fill operation
     inverted_flood_fill_mask = cv2.bitwise_not(flood_fill_mask)
-    
+
     # Invert the initial mask for the flood fill operation
     inverted_initial_mask = cv2.bitwise_not(initial_mask)
 
@@ -144,7 +144,8 @@ def isolate_object(img):
 
     # Create a mask from the flood-filled image
     # Areas that are not gray (128) are part of the object
-    object_mask = cv2.inRange(inverted_initial_mask, 1, 127)
+    gray_flood_fill_color = 128
+    object_mask = cv2.inRange(inverted_initial_mask, 0, gray_flood_fill_color - 1) | cv2.inRange(inverted_initial_mask, gray_flood_fill_color + 1, 255)
 
     mask_rgba = cv2.cvtColor(object_mask, cv2.COLOR_GRAY2BGRA)
     mask_rgba[:, :, 3] = object_mask
