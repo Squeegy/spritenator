@@ -1,6 +1,6 @@
 from PIL import Image
 
-def reduce_image_size(img):
+def reduce_image_size(img, fuzziness=0.9):
     original_avg_color = average_color(img)
     width, height = img.size
 
@@ -14,11 +14,18 @@ def reduce_image_size(img):
         if not is_color_difference_significant(original_avg_color, reduced_avg_color):
             break  # Acceptable color difference, stop shrinking
 
-        # Shrink the rectangle size
-        rect_width //= 2
-        rect_height //= 2
+        # Find the next largest divisors for width and height with fuzziness
+        rect_width = find_largest_divisor(width, rect_width, fuzziness)
+        rect_height = find_largest_divisor(height, rect_height, fuzziness)
 
     return reduced_img
+
+def find_largest_divisor(number, max_divisor, fuzziness):
+    target = number * fuzziness
+    for divisor in range(max_divisor - 1, 1, -1):
+        if number % divisor == 0 and number // divisor >= target:
+            return divisor
+    return 1  # In case no divisor is found, return 1
 
 def create_reduced_image(img, rect_width, rect_height):
     new_width = img.width // rect_width
