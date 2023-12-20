@@ -130,7 +130,7 @@ def isolate_object(img):
 
     # Draw all contours
     cv2.drawContours(contour_image, contours, -1, (155), thickness=1)
-    cv2.drawContours(contour_image, largest_contour, -1, (255), thickness=1)
+    cv2.drawContours(contour_image, largest_contour, -1, (255), thickness=3)
     # Convert back to Pillow image
     contour_pil = Image.fromarray(contour_image)
 
