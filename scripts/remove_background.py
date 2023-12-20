@@ -110,7 +110,7 @@ def remove_background_and_clean_artifacts(image, tolerance=0.01, min_size=64):
 
 def isolate_object(img):
     # Convert Pillow image to OpenCV format in BGR
-    open_cv_image = np.array(img.convert('RGB'))[:, :, ::-1]
+    open_cv_image = np.array(img.convert('RGBA'))[:, :, ::-1]
 
     # Convert image to grayscale
     gray = cv2.cvtColor(open_cv_image, cv2.COLOR_BGR2GRAY)
