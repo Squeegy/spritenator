@@ -127,15 +127,17 @@ def isolate_object(img):
     mask = cv2.dilate(initial_mask, kernel, iterations=1)
     mask = cv2.erode(mask, kernel, iterations=1)
 
-    # Create a new mask to fill
-    filled_mask = np.zeros_like(gray)
+    # Use flood fill to fill the background
+    flood_fill_mask = initial_mask.copy()
+    h, w = flood_fill_mask.shape[:2]
+    mask = np.zeros((h+2, w+2), np.uint8)
+    cv2.floodFill(flood_fill_mask, mask, (0,0), 255)
 
-    # Flood fill or manually fill each contour
-    for contour in contours:
-        cv2.fillPoly(filled_mask, [contour], 255)
+    # Invert the flood-filled mask to isolate the object
+    object_mask = cv2.bitwise_not(flood_fill_mask)
 
-    mask_rgba = cv2.cvtColor(filled_mask, cv2.COLOR_GRAY2BGRA)
-    mask_rgba[:, :, 3] = filled_mask
+    mask_rgba = cv2.cvtColor(object_mask, cv2.COLOR_GRAY2BGRA)
+    mask_rgba[:, :, 3] = object_mask
 
     result = cv2.bitwise_and(open_cv_image, mask_rgba)
     result_pil = Image.fromarray(cv2.cvtColor(result, cv2.COLOR_BGRA2RGBA))
