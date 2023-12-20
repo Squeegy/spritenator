@@ -2,11 +2,14 @@ import os
 import shutil
 from PIL import Image
 import traceback
+import argparse
 import scripts.remove_background
 import scripts.crop
 import scripts.reduce
 
-print("MAIN LOADED")
+parser = argparse.ArgumentParser()
+parser.add_argument('--debug', action='store_true')
+args = parser.parse_args()
 
 # Function to process images (replace this with your image processing logic)
 def process_image(image_path):
@@ -15,23 +18,26 @@ def process_image(image_path):
         print(f"opening image: {image_path}")
         img = Image.open(image_path)
 
-        # Image processing code
-        img, block = scripts.remove_background.remove_background_and_clean_artifacts(img, 0.05)
-
-        # New cropping step
-        img = scripts.crop.crop_transparency(img)
-
-        # Size reduction step
-        img = scripts.reduce.reduce_image_size(img)
-
         # Create the output path within the "sprites" folder
         root, _ = os.path.splitext(image_path)  # Split the path and ignore the original extension
         output_path = f"{root}.png"  # Append '.png' extension
         output_path = os.path.join("sprites", os.path.basename(image_path))
 
+        # Image processing code
+        img, debug = scripts.remove_background.remove_background_and_clean_artifacts(img, 0.05)
+        if args.debug: img.save(os.path.join("sprites", "BACKGROUND" + os.path.basename(image_path)))
+        if args.debug: debug.save(os.path.join("sprites", "BACKGROUND-CANDIDATE" + os.path.basename(image_path)))
+
+        # New cropping step
+        img = scripts.crop.crop_transparency(img)
+        if args.debug: img.save(os.path.join("sprites", "CROP" + os.path.basename(image_path)))
+
+        # Size reduction step
+        img = scripts.reduce.reduce_image_size(img)
+        if args.debug: img.save(os.path.join("sprites", "REDUCE" + os.path.basename(image_path)))
+
         # Save the processed image to the output folder
         img.save(output_path)
-        block.save(os.path.join("sprites", "BACKGROUND" + os.path.basename(image_path)))
 
         print(f"Processed image saved: {output_path}")
 
