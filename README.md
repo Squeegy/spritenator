@@ -1,6 +1,6 @@
 # Spritenator
 
-Welcome to Spritenator, a project for managing and processing images using Python scripts. This repository contains a collection of Python scripts in the `scripts` folder, designed to help specifically with creating sprites from AI generated pixel art. We keep track of the functions and code snippets through Gists.
+Welcome to Spritenator, a project for managing and processing images using Python scripts. This repository contains a collection of Python scripts in the `scripts` folder, designed to help specifically with creating sprites from AI generated pixel art.
 
 ## Table of Contents
 
