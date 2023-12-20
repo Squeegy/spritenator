@@ -18,10 +18,10 @@ def create_color_block(color, size=(50, 50)):
 def get_representative_background_color(pixels, tolerance=1):
     # Extract corner pixels (top-left, top-right, bottom-left, bottom-right)
     corner_pixels = [
-        {"pixel": pixels[0, 0, :3], "position": (0,0)},
-        {"pixel": pixels[0, -1, :3], "position": (0,-1)},
-        {"pixel": pixels[-1, 0, :3], "position": (-1, 0)},
-        {"pixel": pixels[-1, -1, :3], "position": (-1,-1)},
+        {pixel: pixels[0, 0, :3], position: (0,0)},
+        {pixel: pixels[0, -1, :3], position: (0,-1)},
+        {pixel: pixels[-1, 0, :3], position: (-1, 0)},
+        {pixel: pixels[-1, -1, :3], position: (-1,-1)},
     ]
 
     # Extract just the pixel values for calculations
@@ -86,7 +86,7 @@ def remove_background_and_clean_artifacts(image, tolerance=0.01, min_size=64):
     # Label the regions in the mask
     labeled_mask = label(background_mask, connectivity=1)
 
-    bg_label = labeled_mask[valid_pixels[0].position[0], valid_pixels[0].position[1]]
+    bg_label = labeled_mask[valid_pixels[0]["position"][0], valid_pixels[0]["position"][1]]
 
     # Create a new mask where only the connected background region is True
     connected_bg_mask = (labeled_mask == bg_label)
