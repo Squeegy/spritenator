@@ -7,6 +7,7 @@ import traceback
 def process_image(image_path):
     try:
         # Open the image
+        print(f"opening image: {image_path}")
         img = Image.open(image_path)
 
         # Image processing code
