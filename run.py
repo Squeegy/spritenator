@@ -71,6 +71,8 @@ def get_request(url):
     try:
         unique_url = f"{url}?nocache={int(time.time())}"
         response = requests.get(unique_url, headers=headers)
+        if 'Cache-Control' in response.headers:
+            print("Cache-Control header is present")
         response.raise_for_status()  # Will raise an HTTPError if the HTTP request returned an unsuccessful status code
         return response
     except requests.exceptions.RequestException as e:
