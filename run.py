@@ -22,9 +22,6 @@ def import_and_run_github_script(username, repo, script_path):
 
         # Execute the script
         exec(script_code, globals())
-        # Check if 'main' function exists in the executed script
-        if 'main' in globals() and callable(globals()['main']):
-            globals()['main']()
     except requests.exceptions.RequestException as e:
         print(f"Error fetching script from GitHub: {e}")
     except Exception as e:
@@ -101,3 +98,6 @@ if __name__ == "__main__":
 
     # Run the main script if it exists
     import_and_run_github_script(github_username, github_repo, "main.py")
+    # Check if 'main' function exists in the executed script
+    if 'main' in globals() and callable(globals()['main']):
+        globals()['main']()
