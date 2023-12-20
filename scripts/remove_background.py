@@ -24,12 +24,17 @@ def get_representative_background_color(pixels, tolerance=1):
         {pixel: pixels[-1, -1, :3], position: (-1,-1)},
     ])
 
-    # Calculate mean and standard deviation
-    mean = np.mean(corner_pixels, axis=0)
-    std = np.std(corner_pixels, axis=0)
+    # Extract just the pixel values for calculations
+    pixel_values = np.array([p["pixel"] for p in corner_pixels])
 
-    # Filter out pixels that are outside the tolerance (mean ± tolerance * std)
-    valid_pixels = corner_pixels[np.all(np.abs(corner_pixels.pixel - mean) <= tolerance * std, axis=1)]
+    # Calculate mean and standard deviation of pixel values
+    mean = np.mean(pixel_values, axis=0)
+    std = np.std(pixel_values, axis=0)
+
+    # Filter out pixels that are within the tolerance
+    valid_indices = np.all(np.abs(pixel_values - mean) <= tolerance * std, axis=1)
+    valid_pixels = [corner_pixels[i] for i in range(len(corner_pixels)) if valid_indices[i]]
+
 
     # Calculate the average color from the remaining pixels
     if valid_pixels.shape[0] > 0:
