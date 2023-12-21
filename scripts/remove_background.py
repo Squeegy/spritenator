@@ -225,7 +225,7 @@ def isolate_object(img):
 
 def estimate_kernel_size(near_black_mask, noise_threshold=10):
     """
-    Estimates the kernel size for morphological operations based on the smallest contour.
+    Estimates the kernel size for morphological operations based on a lone block of pixels.
 
     Args:
     - near_black_mask (numpy.ndarray): The mask image.
@@ -238,22 +238,23 @@ def estimate_kernel_size(near_black_mask, noise_threshold=10):
     inverted_mask = cv2.bitwise_not(near_black_mask)
     contours, _ = cv2.findContours(inverted_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     
-    # Find the smallest contour that's larger than the noise threshold
-    min_size = np.inf
-    for contour in contours:
-        area = cv2.contourArea(contour)
-        if noise_threshold < area < min_size:
-            min_size = area
-            min_rect = cv2.boundingRect(contour)
+    # Sort contours by area
+    sorted_contours = sorted(contours, key=cv2.contourArea)
+    
+    # Assume the third smallest contour is a lone block (to avoid noise)
+    # and large enough to avoid tiny noise contours
+    for contour in sorted_contours:
+        if cv2.contourArea(contour) > noise_threshold:
+            x, y, w, h = cv2.boundingRect(contour)
+            # Use the average of the width and height to handle non-square blocks
+            block_size = (w + h) / 2
+            break
+    else:
+        # If no contours meet the criteria, return a default kernel size
+        block_size = noise_threshold
 
-    # The kernel size is based on the smallest contour's dimensions
-    # We take the average of the width and height to handle non-square blocks
-    if min_size == np.inf:
-        # No contour larger than the noise threshold was found
-        return max(3, noise_threshold)  # Default to the noise threshold or 3, whichever is larger
-
-    # Calculate the kernel size as slightly larger than the block size
-    kernel_size = int((min_rect[2] + min_rect[3]) / 2) + 2
+    # The kernel size is slightly larger than the block size
+    kernel_size = int(block_size) + 2
 
     # Make sure the kernel size is odd to have a central pixel
     if kernel_size % 2 == 0:
