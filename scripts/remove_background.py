@@ -322,7 +322,7 @@ def isolate_foreground(img, near_black_threshold=30):
     kernel = square(kernel_size)
     closed_mask = binary_closing(closed_mask, kernel)
 
-    closed_mask = close_gaps(closed_mask, kernel)
+    closed_mask = close_gaps(closed_mask, kernel_size)
 
     # Ensure the closed_mask is in the correct format
     if closed_mask.dtype != np.uint8:
