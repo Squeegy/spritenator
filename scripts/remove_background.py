@@ -124,11 +124,14 @@ def isolate_object(img):
     gray = cv2.cvtColor(open_cv_image.copy(), cv2.COLOR_BGR2GRAY)
 
     # Apply Gaussian blur
-    blurred = cv2.GaussianBlur(gray, (9, 9), 0)
+    blurred = cv2.GaussianBlur(gray, (5, 5), 0)
     checkpoint = copy.deepcopy(blurred)
 
+    # Enhance contrast (using histogram equalization)
+    equalized = cv2.equalizeHist(blurred)
+
     # Now apply Canny edge detection
-    edges = cv2.Canny(blurred, 150, 250)
+    edges = cv2.Canny(equalized, 150, 250)
 
     contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
