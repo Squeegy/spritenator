@@ -139,12 +139,6 @@ def homomorphic_filter(img):
     return np.uint8(img_out)
 
 def brighten_light_areas(gray_img):
-    # Convert PIL image to a grayscale image (if it's not already)
-    if gray_img.mode != 'L':
-        gray_img = gray_img.convert('L')
-
-    # Convert PIL image to a NumPy array (OpenCV image)
-    img = np.array(gray_img)
     return homomorphic_filter(img)
     #blurred = cv2.GaussianBlur(gray_img, (13, 13), 0)
     #adaptive_thresh = cv2.adaptiveThreshold(blurred, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 51, 5)
