@@ -4,6 +4,7 @@ from skimage.measure import label
 from skimage.morphology import binary_opening, binary_closing, remove_small_objects
 from PIL import Image
 import cv2
+import copy
 
 def create_color_block(color, size=(50, 50)):
     """
@@ -113,7 +114,7 @@ def isolate_object(img):
     gray = cv2.cvtColor(open_cv_image.copy(), cv2.COLOR_BGR2GRAY)
     edges = cv2.Canny(gray, 100, 200)
 
-    checkpoint = open_cv_image.deepcopy()
+    checkpoint = copy.deepcopy(open_cv_image)
 
     contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
