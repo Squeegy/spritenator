@@ -113,6 +113,8 @@ def isolate_object(img):
     gray = cv2.cvtColor(open_cv_image.copy(), cv2.COLOR_BGR2GRAY)
     edges = cv2.Canny(gray, 100, 200)
 
+    checkpoint = open_cv_image.copy()
+
     contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
     # Create an initial mask with contour edges
@@ -159,7 +161,7 @@ def isolate_object(img):
 
     # Convert the result to RGBA for PIL compatibility (if needed)
     result_pil = Image.fromarray(cv2.cvtColor(result_bgra, cv2.COLOR_BGRA2RGBA))
-    mask_pil = Image.fromarray(cv2.cvtColor(open_cv_image, cv2.COLOR_BGRA2RGBA))
+    mask_pil = Image.fromarray(cv2.cvtColor(checkpoint, cv2.COLOR_BGRA2RGBA))
 
     return result_pil, mask_pil
 
