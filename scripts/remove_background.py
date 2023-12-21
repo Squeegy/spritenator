@@ -143,11 +143,9 @@ def homomorphic_filter(img):
 
 def brighten_light_areas(gray_img):
     filtered_image = homomorphic_filter(gray_img)
-    # Define a strict threshold
-    strict_threshold = 5  # Pixels with values below this will be black, above will be white
-
-    # Apply the strict thresholding
-    _, thresholded_img = cv2.threshold(filtered_img, strict_threshold, 255, cv2.THRESH_BINARY)
+    
+    # Apply Otsu's thresholding
+    _, thresholded_img = cv2.threshold(filtered_img, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
 
     return thresholded_img
     #blurred = cv2.GaussianBlur(gray_img, (13, 13), 0)
