@@ -111,7 +111,7 @@ def remove_background_and_clean_artifacts(image, tolerance=0.01, min_size=64):
     return new_image, color_block
 
 def brighten_light_areas(gray_img):
-    adaptive_thresh = cv2.adaptiveThreshold(gray_img, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 15, 2)
+    adaptive_thresh = cv2.adaptiveThreshold(gray_img, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 15, 7)
  
     return adaptive_thresh
 
