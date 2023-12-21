@@ -114,21 +114,24 @@ def homomorphic_filter(img):
     # Step 1: Apply the logarithmic transformation
     img_log = np.log1p(np.array(img, dtype="float"))
 
-    # Step 2: Perform the Fourier transform
+    # Step 2: Perform the Fourier transform and shift the frequency components
     img_fft = np.fft.fft2(img_log)
+    img_fft_shift = np.fft.fftshift(img_fft)
 
-    # Step 3: Create a high-pass filter
+    # Step 3: Create a high-pass filter (correcting the previous low-pass approach)
     rows, cols = img.shape
     radius = 30  # The radius of the high-pass filter
     center = (rows // 2, cols // 2)
     mask = np.ones((rows, cols), dtype="float")
     cv2.circle(mask, center, radius, 0, thickness=-1)
+    mask = 1 - mask  # Invert the mask to create a high-pass filter
 
-    # Apply the high-pass filter to the Fourier-transformed image
-    img_fft_hp = img_fft * mask
+    # Apply the high-pass filter to the shifted Fourier-transformed image
+    img_fft_hp = img_fft_shift * mask
 
-    # Step 4: Apply the inverse Fourier transform
-    img_ifft = np.fft.ifft2(img_fft_hp)
+    # Step 4: Inverse shift and apply the inverse Fourier transform
+    img_fft_hp_shift = np.fft.ifftshift(img_fft_hp)
+    img_ifft = np.fft.ifft2(img_fft_hp_shift)
 
     # Step 5: Apply the exponential transformation
     img_exp = np.expm1(np.real(img_ifft))
