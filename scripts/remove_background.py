@@ -162,7 +162,7 @@ def isolate_object(img):
 
     # Convert the result to RGBA for PIL compatibility (if needed)
     result_pil = Image.fromarray(cv2.cvtColor(result_bgra, cv2.COLOR_BGRA2RGBA))
-    mask_pil = Image.fromarray(checkpoint)
+    mask_pil = img
 
     return result_pil, mask_pil
 
