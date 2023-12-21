@@ -6,6 +6,7 @@ from PIL import Image
 import cv2
 import copy
 import os
+import itertools
 
 def create_color_block(color, size=(50, 50)):
     """
