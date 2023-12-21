@@ -112,7 +112,7 @@ def remove_background_and_clean_artifacts(image, tolerance=0.01, min_size=64):
 def brighten_light_areas(gray_img, darkness_threshold=5, brightness_increase=200):
     # Identify really dark areas
     dark_mask = gray_img < darkness_threshold
-    dark_mask.save(os.path.join("sprites", "DARKMASK"+gray_img.text)
+    dark_mask.save(os.path.join("sprites", "DARKMASK"+gray_img.text))
     # Brighten other areas
     brightened_img = np.where(dark_mask, gray_img, gray_img + brightness_increase)
     # Clip values to ensure they stay in the 0-255 range
