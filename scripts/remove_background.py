@@ -123,7 +123,7 @@ def isolate_object(img):
 
     gray = cv2.cvtColor(open_cv_image.copy(), cv2.COLOR_BGR2GRAY)
 
-    checkpoint = copy.deepcopy(initial_mask)
+    checkpoint = copy.deepcopy(gray)
 
     # Apply Gaussian blur
     blurred = cv2.GaussianBlur(gray, (5, 5), 0)
