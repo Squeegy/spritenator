@@ -142,7 +142,7 @@ def homomorphic_filter(img):
     return np.uint8(img_out)
 
 def brighten_light_areas(gray_img):
-    filtered_image = homomorphic_filter(gray_img)
+    filtered_img = homomorphic_filter(gray_img)
     
     # Apply Otsu's thresholding
     _, thresholded_img = cv2.threshold(filtered_img, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
