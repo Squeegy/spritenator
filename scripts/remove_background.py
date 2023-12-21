@@ -122,9 +122,7 @@ def isolate_object(img):
         open_cv_image = cv2.merge((open_cv_image, alpha_channel))  # Add the alpha channel
 
     gray = cv2.cvtColor(open_cv_image.copy(), cv2.COLOR_BGR2GRAY)
-    edges = cv2.Canny(gray, 100, 200)
-
-    checkpoint = copy.deepcopy(open_cv_image)
+    edges = cv2.Canny(gray, 50, 150)
 
     contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
@@ -132,7 +130,7 @@ def isolate_object(img):
     initial_mask = np.zeros_like(gray)
     cv2.drawContours(initial_mask, contours, -1, 255, thickness=2)
 
-# Define the kernel size for the morphological operations
+    # Define the kernel size for the morphological operations
     kernel_size = 3
     kernel = np.ones((kernel_size, kernel_size), np.uint8)
 
