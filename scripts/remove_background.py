@@ -320,8 +320,13 @@ def isolate_foreground(img, near_black_threshold=30):
     kernel_size = estimate_kernel_size(near_black_mask)
     kernel = square(kernel_size)
     closed_mask = binary_closing(closed_mask, kernel)
+    checkpoint = copy.deepcopy(closed_mask)
 
     closed_mask = close_gaps(closed_mask, kernel_size)
+
+    # Ensure the closed_mask is in the correct format
+    if closed_mask.dtype != np.uint8:
+        closed_mask = closed_mask.astype(np.uint8)
 
     # Invert the closed mask for flood fill
     invert_closed_mask = cv2.bitwise_not(closed_mask)
@@ -340,6 +345,6 @@ def isolate_foreground(img, near_black_threshold=30):
 
     # Convert the result and mask to PIL images
     result_pil = Image.fromarray(cv2.cvtColor(result, cv2.COLOR_BGRA2RGBA))
-    mask_pil = Image.fromarray(closed_mask)
+    mask_pil = Image.fromarray(checkpoint)
 
     return result_pil, mask_pil
