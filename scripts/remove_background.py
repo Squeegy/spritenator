@@ -252,7 +252,11 @@ def isolate_foreground(img, near_black_threshold=30, kernel_size=5):
 
     # Create a mask for near black pixels
     near_black_mask = cv2.inRange(gray, 0, near_black_threshold)
-    checkpoint = copy.deepcopy(near_black_mask)
+    # Perform morphological closing to close gaps in the mask
+    kernel_size = 5
+    kernel = morphology.square(kernel_size)
+    closed_mask = morphology.binary_closing(near_black_mask, selem=kernel)
+    checkpoint = copy.deepcopy(closed_mask)
     # Edge detection on the near black mask
     edges = cv2.Canny(near_black_mask, 100, 200)
 
