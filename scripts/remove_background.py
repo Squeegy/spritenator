@@ -109,6 +109,17 @@ def remove_background_and_clean_artifacts(image, tolerance=0.01, min_size=64):
     # Return the new image and the color block
     return new_image, color_block
 
+def brighten_light_areas(gray_img, darkness_threshold=40, brightness_increase=100):
+    # Identify really dark areas
+    dark_mask = gray_img < darkness_threshold
+
+    # Brighten other areas
+    brightened_img = np.where(dark_mask, gray_img, gray_img + brightness_increase)
+    # Clip values to ensure they stay in the 0-255 range
+    brightened_img = np.clip(brightened_img, 0, 255).astype(np.uint8)
+
+    return brightened_img
+
 def isolate_object(img):
     # Check the image mode and convert to RGBA if not already in that format
     if img.mode != 'RGBA':
@@ -122,9 +133,9 @@ def isolate_object(img):
         open_cv_image = cv2.merge((open_cv_image, alpha_channel))  # Add the alpha channel
 
     gray = cv2.cvtColor(open_cv_image.copy(), cv2.COLOR_BGR2GRAY)
-
+    gray = brighten_light_areas(gray)
     # Apply Gaussian blur
-    blurred = cv2.GaussianBlur(gray, (6, 6), 0)
+    blurred = cv2.GaussianBlur(gray, (5, 5), 0)
     checkpoint = copy.deepcopy(blurred)
 
     # Now apply Canny edge detection
