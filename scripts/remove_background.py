@@ -110,7 +110,7 @@ def remove_background_and_clean_artifacts(image, tolerance=0.01, min_size=64):
     # Return the new image and the color block
     return new_image, color_block
 
-def brighten_light_areas(gray_img, darkness_threshold=5, brightness_increase=200):
+def brighten_light_areas(gray_img, darkness_threshold=100, brightness_increase=200):
     # Identify really dark areas
     dark_mask = gray_img < darkness_threshold
 
