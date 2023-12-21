@@ -223,7 +223,7 @@ def isolate_object(img):
     mask_pil = Image.fromarray(cv2.cvtColor(checkpoint, cv2.COLOR_BGRA2RGBA))
     return result_pil, mask_pil
 
-def isolate_foreground(img, near_black_threshold=15, kernel_size=5):
+def isolate_foreground(img, near_black_threshold=30, kernel_size=5):
     """
     Isolates the foreground from an image based on near-black edge detection.
 
