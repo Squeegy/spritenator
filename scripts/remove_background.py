@@ -5,6 +5,7 @@ from skimage.morphology import binary_opening, binary_closing, remove_small_obje
 from PIL import Image
 import cv2
 import copy
+import os
 
 def create_color_block(color, size=(50, 50)):
     """
