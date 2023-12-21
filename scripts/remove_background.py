@@ -116,10 +116,12 @@ def brighten_light_areas(gray_img, darkness_threshold=50, brightness_increase=25
 
     # Brighten other areas
     brightened_img = np.where(dark_mask, gray_img, gray_img + brightness_increase)
-    Image.fromarray(cv2.cvtColor(brightened_img, cv2.COLOR_BGRA2RGBA)).save(os.path.join("sprites", "DARKMASK"+str(gray_img)+".png"))
 
     # Clip values to ensure they stay in the 0-255 range
     brightened_img = np.clip(brightened_img, 0, 255).astype(np.uint8)
+
+    Image.fromarray(cv2.cvtColor(brightened_img, cv2.COLOR_BGRA2RGBA)).save(os.path.join("sprites", "brightened"+str(gray_img)+".png"))
+    Image.fromarray(cv2.cvtColor(gray_img, cv2.COLOR_BGRA2RGBA)).save(os.path.join("sprites", "original"+str(gray_img)+".png"))
 
     return brightened_img
 
