@@ -110,11 +110,46 @@ def remove_background_and_clean_artifacts(image, tolerance=0.01, min_size=64):
     # Return the new image and the color block
     return new_image, color_block
 
+def homomorphic_filter(img):
+    # Step 1: Apply the logarithmic transformation
+    img_log = np.log1p(np.array(img, dtype="float"))
+
+    # Step 2: Perform the Fourier transform
+    img_fft = np.fft.fft2(img_log)
+
+    # Step 3: Create a high-pass filter
+    rows, cols = img.shape
+    radius = 30  # The radius of the high-pass filter
+    center = (rows // 2, cols // 2)
+    mask = np.ones((rows, cols), dtype="float")
+    cv2.circle(mask, center, radius, 0, thickness=-1)
+
+    # Apply the high-pass filter to the Fourier-transformed image
+    img_fft_hp = img_fft * mask
+
+    # Step 4: Apply the inverse Fourier transform
+    img_ifft = np.fft.ifft2(img_fft_hp)
+
+    # Step 5: Apply the exponential transformation
+    img_exp = np.expm1(np.real(img_ifft))
+
+    # Step 6: Normalize the image to bring the pixel values between 0 and 255
+    img_out = cv2.normalize(img_exp, None, 0, 255, cv2.NORM_MINMAX)
+
+    return np.uint8(img_out)
+
 def brighten_light_areas(gray_img):
-    blurred = cv2.GaussianBlur(gray_img, (13, 13), 0)
-    adaptive_thresh = cv2.adaptiveThreshold(blurred, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 51, 5)
+    # Convert PIL image to a grayscale image (if it's not already)
+    if gray_img.mode != 'L':
+        gray_img = gray_img.convert('L')
+
+    # Convert PIL image to a NumPy array (OpenCV image)
+    img = np.array(gray_img)
+    return homomorphic_filter(img)
+    #blurred = cv2.GaussianBlur(gray_img, (13, 13), 0)
+    #adaptive_thresh = cv2.adaptiveThreshold(blurred, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 51, 5)
  
-    return adaptive_thresh
+    #return adaptive_thresh
 
 def isolate_object(img):
     # Check the image mode and convert to RGBA if not already in that format
