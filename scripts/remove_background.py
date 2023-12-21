@@ -122,7 +122,7 @@ def isolate_object(img):
         open_cv_image = cv2.merge((open_cv_image, alpha_channel))  # Add the alpha channel
 
     gray = cv2.cvtColor(open_cv_image.copy(), cv2.COLOR_BGR2GRAY)
-    edges = cv2.Canny(gray, 150, 300)
+    edges = cv2.Canny(gray, 200, 300)
 
     contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
