@@ -273,7 +273,7 @@ def isolate_foreground(img, near_black_threshold=15, kernel_size=5):
 
     # Apply the mask to isolate the foreground
     foreground_mask = cv2.threshold(foreground_mask, 1, 255, cv2.THRESH_BINARY)[1]
-    result = cv2.bitwise_and(img, img, mask=foreground_mask)
+    result = cv2.bitwise_and(open_cv_image, open_cv_image, mask=foreground_mask)
 
     result_pil = Image.fromarray(cv2.cvtColor(result, cv2.COLOR_BGRA2RGBA))
     mask_pil = Image.fromarray(cv2.cvtColor(checkpoint, cv2.COLOR_BGRA2RGBA))
