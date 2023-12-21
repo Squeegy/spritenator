@@ -110,20 +110,10 @@ def remove_background_and_clean_artifacts(image, tolerance=0.01, min_size=64):
     # Return the new image and the color block
     return new_image, color_block
 
-def brighten_light_areas(gray_img, darkness_threshold=50, brightness_increase=255):
-    # Identify really dark areas
-    dark_mask = gray_img < darkness_threshold
-
-    # Brighten other areas
-    brightened_img = np.where(dark_mask, gray_img, gray_img + brightness_increase)
-
-    # Clip values to ensure they stay in the 0-255 range
-    brightened_img = np.clip(brightened_img, 0, 255).astype(np.uint8)
-
-    Image.fromarray(cv2.cvtColor(brightened_img, cv2.COLOR_BGRA2RGBA)).save(os.path.join("sprites", "brightened"+str(gray_img)+".png"))
-    Image.fromarray(cv2.cvtColor(gray_img, cv2.COLOR_BGRA2RGBA)).save(os.path.join("sprites", "original"+str(gray_img)+".png"))
-
-    return brightened_img
+def brighten_light_areas(gray_img):
+    adaptive_thresh = cv2.adaptiveThreshold(gray_img, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2)
+ 
+    return adaptive_thresh
 
 def isolate_object(img):
     # Check the image mode and convert to RGBA if not already in that format
@@ -141,7 +131,7 @@ def isolate_object(img):
     gray = brighten_light_areas(gray)
     # Apply Gaussian blur
     blurred = cv2.GaussianBlur(gray, (5, 5), 0)
-    checkpoint = copy.deepcopy(blurred)
+    checkpoint = copy.deepcopy(gray)
 
     # Now apply Canny edge detection
     edges = cv2.Canny(gray, 150, 250)
