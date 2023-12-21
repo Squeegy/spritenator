@@ -225,36 +225,42 @@ def isolate_object(img):
 
 def estimate_kernel_size(near_black_mask, noise_threshold=10):
     """
-    Estimates the kernel size for morphological operations based on a lone block of pixels.
+    Estimates the kernel size for morphological operations based on scanning for the smallest
+    continuous line of the black outline that's above a noise threshold.
 
     Args:
     - near_black_mask (numpy.ndarray): The mask image.
-    - noise_threshold (int): The threshold to ignore noise contours.
+    - noise_threshold (int): The threshold to ignore noise lines.
     
     Returns:
     - kernel_size (int): The estimated kernel size.
     """
-    # Invert the mask to find contours of the white blocks
-    inverted_mask = cv2.bitwise_not(near_black_mask)
-    contours, _ = cv2.findContours(inverted_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    
-    # Sort contours by area
-    sorted_contours = sorted(contours, key=cv2.contourArea)
-    
-    # Assume the third smallest contour is a lone block (to avoid noise)
-    # and large enough to avoid tiny noise contours
-    for contour in sorted_contours:
-        if cv2.contourArea(contour) > noise_threshold:
-            x, y, w, h = cv2.boundingRect(contour)
-            # Use the average of the width and height to handle non-square blocks
-            block_size = (w + h) / 2
-            break
-    else:
-        # If no contours meet the criteria, return a default kernel size
-        block_size = noise_threshold
+    # Initialize the minimum line length to a large value
+    min_line_length = np.inf
 
-    # The kernel size is slightly larger than the block size
-    kernel_size = int(block_size) + 2
+    # Scan vertically
+    for col in range(near_black_mask.shape[1]):
+        line = near_black_mask[:, col]
+        line_lengths = [len(list(group)) for key, group in itertools.groupby(line) if key == 0]
+        valid_lengths = [length for length in line_lengths if length > noise_threshold]
+        if valid_lengths:
+            min_line_length = min(min_line_length, min(valid_lengths))
+
+    # Scan horizontally
+    for row in range(near_black_mask.shape[0]):
+        line = near_black_mask[row, :]
+        line_lengths = [len(list(group)) for key, group in itertools.groupby(line) if key == 0]
+        valid_lengths = [length for length in line_lengths if length > noise_threshold]
+        if valid_lengths:
+            min_line_length = min(min_line_length, min(valid_lengths))
+
+    # Check if a valid line was found
+    if min_line_length == np.inf:
+        # No valid line found
+        return max(3, noise_threshold + 1)  # Default to noise threshold + 1, or 3, whichever is larger
+
+    # The kernel size is slightly larger than the smallest line found
+    kernel_size = min_line_length + 2
 
     # Make sure the kernel size is odd to have a central pixel
     if kernel_size % 2 == 0:
