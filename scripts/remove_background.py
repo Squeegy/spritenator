@@ -223,6 +223,44 @@ def isolate_object(img):
     mask_pil = Image.fromarray(cv2.cvtColor(checkpoint, cv2.COLOR_BGRA2RGBA))
     return result_pil, mask_pil
 
+def estimate_kernel_size(near_black_mask, noise_threshold=10):
+    """
+    Estimates the kernel size for morphological operations based on the smallest contour.
+
+    Args:
+    - near_black_mask (numpy.ndarray): The mask image.
+    - noise_threshold (int): The threshold to ignore noise contours.
+    
+    Returns:
+    - kernel_size (int): The estimated kernel size.
+    """
+    # Invert the mask to find contours of the white blocks
+    inverted_mask = cv2.bitwise_not(near_black_mask)
+    contours, _ = cv2.findContours(inverted_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    
+    # Find the smallest contour that's larger than the noise threshold
+    min_size = np.inf
+    for contour in contours:
+        area = cv2.contourArea(contour)
+        if noise_threshold < area < min_size:
+            min_size = area
+            min_rect = cv2.boundingRect(contour)
+
+    # The kernel size is based on the smallest contour's dimensions
+    # We take the average of the width and height to handle non-square blocks
+    if min_size == np.inf:
+        # No contour larger than the noise threshold was found
+        return max(3, noise_threshold)  # Default to the noise threshold or 3, whichever is larger
+
+    # Calculate the kernel size as slightly larger than the block size
+    kernel_size = int((min_rect[2] + min_rect[3]) / 2) + 2
+
+    # Make sure the kernel size is odd to have a central pixel
+    if kernel_size % 2 == 0:
+        kernel_size += 1
+
+    return kernel_size
+
 def isolate_foreground(img, near_black_threshold=30, kernel_size=5):
     """
     Isolates the foreground from an image based on near-black edge detection.
@@ -253,7 +291,7 @@ def isolate_foreground(img, near_black_threshold=30, kernel_size=5):
     # Create a mask for near black pixels
     near_black_mask = cv2.inRange(gray, 0, near_black_threshold)
     # Perform morphological closing to close gaps in the mask
-    kernel_size = 5
+    kernel_size = estimate_kernel_size(near_black_mask)
     kernel = morphology.square(kernel_size)
     closed_mask = morphology.binary_closing(near_black_mask, selem=kernel)
     checkpoint = copy.deepcopy(closed_mask)
