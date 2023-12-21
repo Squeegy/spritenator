@@ -120,7 +120,7 @@ def homomorphic_filter(img):
 
     # Step 3: Create a high-pass filter (correcting the previous low-pass approach)
     rows, cols = img.shape
-    radius = 15  # The radius of the high-pass filter
+    radius = 45  # The radius of the high-pass filter
     center = (rows // 2, cols // 2)
     mask = np.ones((rows, cols), dtype="float")
     cv2.circle(mask, center, radius, 0, thickness=-1)
