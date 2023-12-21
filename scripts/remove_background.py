@@ -109,7 +109,7 @@ def remove_background_and_clean_artifacts(image, tolerance=0.01, min_size=64):
     # Return the new image and the color block
     return new_image, color_block
 
-def brighten_light_areas(gray_img, darkness_threshold=20, brightness_increase=100):
+def brighten_light_areas(gray_img, darkness_threshold=20, brightness_increase=200):
     # Identify really dark areas
     dark_mask = gray_img < darkness_threshold
 
@@ -139,7 +139,7 @@ def isolate_object(img):
     checkpoint = copy.deepcopy(blurred)
 
     # Now apply Canny edge detection
-    edges = cv2.Canny(blurred, 150, 250)
+    edges = cv2.Canny(gray, 150, 250)
 
     contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
