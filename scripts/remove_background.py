@@ -113,7 +113,7 @@ def remove_background_and_clean_artifacts(image, tolerance=0.01, min_size=64):
 def brighten_light_areas(gray_img, darkness_threshold=5, brightness_increase=200):
     # Identify really dark areas
     dark_mask = gray_img < darkness_threshold
-    Image.fromarray(cv2.cvtColor(checkpoint, cv2.COLOR_BGRA2RGBA)).save(os.path.join("sprites", "DARKMASK"+str(gray_img)))
+    Image.fromarray(cv2.cvtColor(dark_mask, cv2.COLOR_BGRA2RGBA)).save(os.path.join("sprites", "DARKMASK"+str(gray_img)))
 
     # Brighten other areas
     brightened_img = np.where(dark_mask, gray_img, gray_img + brightness_increase)
