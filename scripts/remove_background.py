@@ -113,7 +113,7 @@ def isolate_object(img):
     gray = cv2.cvtColor(open_cv_image.copy(), cv2.COLOR_BGR2GRAY)
     edges = cv2.Canny(gray, 100, 200)
 
-    checkpoint = open_cv_image.copy()
+    checkpoint = open_cv_image.deepcopy()
 
     contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
