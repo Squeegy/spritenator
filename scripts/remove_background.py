@@ -269,25 +269,24 @@ def estimate_kernel_size(near_black_mask, noise_threshold=10, scale_factor=1.5):
 
     return kernel_size
 
+def close_gaps_in_line(line, max_gap_size):
+    new_line = line.copy()
+    for i in range(1, len(line) - max_gap_size):
+        if line[i] == 0 and all(line[i + j] == 255 for j in range(1, max_gap_size + 1)):
+            new_line[i:i + max_gap_size] = 255
+            break  # Stop after closing the first gap in this line
+    return new_line
+
 def close_gaps(mask, max_gap_size):
     height, width = mask.shape
 
-    # Function to close gaps in a line
-    def close_gaps_in_line(line):
-        new_line = line.copy()
-        for i in range(1, len(line) - max_gap_size):
-            if line[i] == 0 and all(line[i+j] == 255 for j in range(1, max_gap_size + 1)):
-                new_line[i:i+max_gap_size] = 255
-                break  # Stop after closing the first gap in this line
-        return new_line
-
     # Close gaps horizontally
     for y in range(height):
-        mask[y, :] = close_gaps_in_line(mask[y, :])
+        mask[y, :] = close_gaps_in_line(mask[y, :], max_gap_size)
 
     # Close gaps vertically
     for x in range(width):
-        mask[:, x] = close_gaps_in_line(mask[:, x])
+        mask[:, x] = close_gaps_in_line(mask[:, x], max_gap_size)
 
     return mask
 
