@@ -269,6 +269,28 @@ def estimate_kernel_size(near_black_mask, noise_threshold=10, scale_factor=1.5):
 
     return kernel_size
 
+def close_gaps(mask, max_gap_size):
+    height, width = mask.shape
+
+    # Function to close gaps in a line
+    def close_gaps_in_line(line):
+        new_line = line.copy()
+        for i in range(1, len(line) - max_gap_size):
+            if line[i] == 0 and all(line[i+j] == 255 for j in range(1, max_gap_size + 1)):
+                new_line[i:i+max_gap_size] = 255
+                break  # Stop after closing the first gap in this line
+        return new_line
+
+    # Close gaps horizontally
+    for y in range(height):
+        mask[y, :] = close_gaps_in_line(mask[y, :])
+
+    # Close gaps vertically
+    for x in range(width):
+        mask[:, x] = close_gaps_in_line(mask[:, x])
+
+    return mask
+
 def isolate_foreground(img, near_black_threshold=30):
     """
     Isolates the foreground from an image based on near-black edge detection and iterative morphological closing.
@@ -298,10 +320,10 @@ def isolate_foreground(img, near_black_threshold=30):
     # Perform iterative morphological closing
     closed_mask = near_black_mask
     kernel_size = estimate_kernel_size(near_black_mask)
-    while kernel_size >= 3:
-        kernel = square(kernel_size)
-        closed_mask = binary_closing(closed_mask, kernel)
-        kernel_size = max(2, kernel_size // 2)  # Reduce kernel size, minimum 3 so if 2 is found we exit the loop
+    kernel = square(kernel_size)
+    closed_mask = binary_closing(closed_mask, kernel)
+
+    closed_mask = close_gaps(closed_mask, kernel)
 
     # Ensure the closed_mask is in the correct format
     if closed_mask.dtype != np.uint8:
@@ -324,6 +346,6 @@ def isolate_foreground(img, near_black_threshold=30):
 
     # Convert the result and mask to PIL images
     result_pil = Image.fromarray(cv2.cvtColor(result, cv2.COLOR_BGRA2RGBA))
-    mask_pil = Image.fromarray(filled_foreground_mask)
+    mask_pil = Image.fromarray(closed_mask)
 
     return result_pil, mask_pil
