@@ -223,3 +223,60 @@ def isolate_object(img):
     mask_pil = Image.fromarray(cv2.cvtColor(checkpoint, cv2.COLOR_BGRA2RGBA))
     return result_pil, mask_pil
 
+def isolate_foreground(img, near_black_threshold=15, kernel_size=5):
+    """
+    Isolates the foreground from an image based on near-black edge detection.
+
+    Args:
+    - img (str): PIL image file.
+    - near_black_threshold (int): Threshold for considering a pixel as near black.
+    - kernel_size (int): Size of the kernel for morphological operations.
+
+    Returns:
+    - result (numpy.ndarray): Image with the foreground isolated.
+    """
+
+    if img.mode != 'RGBA':
+        img = img.convert('RGBA')
+
+    # Convert PIL image to OpenCV format (BGRA)
+    open_cv_image = np.array(img)[:, :, :3]  # Get RGB channels
+    open_cv_image = cv2.cvtColor(open_cv_image, cv2.COLOR_RGB2BGR)  # Convert RGB to BGR
+    if img.mode == 'RGBA':
+        alpha_channel = np.array(img)[:, :, 3]  # Extract the alpha channel
+        open_cv_image = cv2.merge((open_cv_image, alpha_channel))  # Add the alpha channel
+
+
+    # Convert the image to grayscale
+    gray = cv2.cvtColor(open_cv_image, cv2.COLOR_BGR2GRAY)
+
+    # Create a mask for near black pixels
+    near_black_mask = cv2.inRange(gray, 0, near_black_threshold)
+    checkpoint = copy.deepcopy(near_black_mask)
+    # Edge detection on the near black mask
+    edges = cv2.Canny(near_black_mask, 100, 200)
+
+    # Perform morphological closing
+    kernel = np.ones((kernel_size, kernel_size), np.uint8)
+    closed_edges = cv2.morphologyEx(edges, cv2.MORPH_CLOSE, kernel)
+
+    # Invert the closed edges for flood fill
+    invert_closed_edges = cv2.bitwise_not(closed_edges)
+
+    # Flood fill from the corner
+    h, w = invert_closed_edges.shape[:2]
+    mask = np.zeros((h+2, w+2), np.uint8)
+    cv2.floodFill(invert_closed_edges, mask, (0,0), 255)
+
+    # Invert back to get the foreground mask
+    foreground_mask = cv2.bitwise_not(invert_closed_edges)
+
+    # Apply the mask to isolate the foreground
+    foreground_mask = cv2.threshold(foreground_mask, 1, 255, cv2.THRESH_BINARY)[1]
+    result = cv2.bitwise_and(image, image, mask=foreground_mask)
+
+    result_pil = Image.fromarray(cv2.cvtColor(result, cv2.COLOR_BGRA2RGBA))
+    mask_pil = Image.fromarray(cv2.cvtColor(checkpoint, cv2.COLOR_BGRA2RGBA))
+    return result_pil, mask_pil
+
+    return result
