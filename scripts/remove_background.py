@@ -271,27 +271,23 @@ def estimate_kernel_size(near_black_mask, noise_threshold=10, scale_factor=1.5):
 
 def isolate_foreground(img, near_black_threshold=30):
     """
-    Isolates the foreground from an image based on near-black edge detection.
+    Isolates the foreground from an image based on near-black edge detection and iterative morphological closing.
 
     Args:
-    - img (str): PIL image file.
+    - img (PIL.Image): PIL image file.
     - near_black_threshold (int): Threshold for considering a pixel as near black.
-    - kernel_size (int): Size of the kernel for morphological operations.
+    - closing_iterations (int): Number of iterations for morphological closing, with decreasing kernel size.
 
     Returns:
-    - result (numpy.ndarray): Image with the foreground isolated.
+    - result_pil (PIL.Image): Image with the foreground isolated.
+    - mask_pil (PIL.Image): Binary mask of the isolated foreground.
     """
-
     if img.mode != 'RGBA':
         img = img.convert('RGBA')
 
-    # Convert PIL image to OpenCV format (BGRA)
+    # Convert PIL image to OpenCV format
     open_cv_image = np.array(img)[:, :, :3]  # Get RGB channels
-    open_cv_image = cv2.cvtColor(open_cv_image, cv2.COLOR_RGB2BGR)  # Convert RGB to BGR
-    if img.mode == 'RGBA':
-        alpha_channel = np.array(img)[:, :, 3]  # Extract the alpha channel
-        open_cv_image = cv2.merge((open_cv_image, alpha_channel))  # Add the alpha channel
-
+    open_cv_image = cv2.cvtColor(open_cv_image, cv2.COLOR_RGB2BGR)
 
     # Convert the image to grayscale
     gray = cv2.cvtColor(open_cv_image, cv2.COLOR_BGR2GRAY)
@@ -299,18 +295,17 @@ def isolate_foreground(img, near_black_threshold=30):
     # Create a mask for near black pixels
     near_black_mask = cv2.inRange(gray, 0, near_black_threshold)
 
-    # Perform morphological closing to close gaps in the mask
+    # Perform iterative morphological closing
+    closed_mask = near_black_mask
     kernel_size = estimate_kernel_size(near_black_mask)
-    kernel = square(kernel_size)
-    closed_mask = binary_closing(near_black_mask, kernel)
+    while kernel_size >= 3:
+        kernel = square(kernel_size)
+        closed_mask = binary_closing(closed_mask, kernel)
+        kernel_size = max(2, kernel_size // 2)  # Reduce kernel size, minimum 3 so if 2 is found we exit the loop
 
     # Ensure the closed_mask is in the correct format
     if closed_mask.dtype != np.uint8:
         closed_mask = closed_mask.astype(np.uint8)
-
-    # Check if closed_mask is not empty
-    if closed_mask.size == 0:
-        raise ValueError("Closed mask is empty. Check the input image and parameters.") 
 
     # Invert the closed mask for flood fill
     invert_closed_mask = cv2.bitwise_not(closed_mask)
@@ -327,6 +322,7 @@ def isolate_foreground(img, near_black_threshold=30):
     # Apply the mask to isolate the foreground
     result = cv2.bitwise_and(open_cv_image, open_cv_image, mask=filled_foreground_mask)
 
+    # Convert the result and mask to PIL images
     result_pil = Image.fromarray(cv2.cvtColor(result, cv2.COLOR_BGRA2RGBA))
     mask_pil = Image.fromarray(filled_foreground_mask)
 
