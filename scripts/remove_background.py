@@ -110,7 +110,17 @@ def remove_background_and_clean_artifacts(image, tolerance=0.01, min_size=64):
     return new_image, color_block
 
 def isolate_object(img):
-    open_cv_image = np.array(img.convert('RGBA'))[:, :, ::-1]
+    # Check the image mode and convert to RGBA if not already in that format
+    if img.mode != 'RGBA':
+        img = img.convert('RGBA')
+
+    # Convert PIL image to OpenCV format (BGRA)
+    open_cv_image = np.array(img)[:, :, :3]  # Get RGB channels
+    open_cv_image = cv2.cvtColor(open_cv_image, cv2.COLOR_RGB2BGR)  # Convert RGB to BGR
+    if img.mode == 'RGBA':
+        alpha_channel = np.array(img)[:, :, 3]  # Extract the alpha channel
+        open_cv_image = cv2.merge((open_cv_image, alpha_channel))  # Add the alpha channel
+
     gray = cv2.cvtColor(open_cv_image.copy(), cv2.COLOR_BGR2GRAY)
     edges = cv2.Canny(gray, 100, 200)
 
@@ -162,7 +172,6 @@ def isolate_object(img):
 
     # Convert the result to RGBA for PIL compatibility (if needed)
     result_pil = Image.fromarray(cv2.cvtColor(result_bgra, cv2.COLOR_BGRA2RGBA))
-    mask_pil = img
-
+    mask_pil = Image.fromarray(cv2.cvtColor(checkpoint, cv2.COLOR_BGRA2RGBA))
     return result_pil, mask_pil
 
