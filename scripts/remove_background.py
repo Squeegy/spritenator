@@ -124,7 +124,7 @@ def isolate_object(img):
     gray = cv2.cvtColor(open_cv_image.copy(), cv2.COLOR_BGR2GRAY)
 
     # Apply Gaussian blur
-    blurred = cv2.GaussianBlur(gray, (7, 7), 0)
+    blurred = cv2.GaussianBlur(gray, (6, 6), 0)
     checkpoint = copy.deepcopy(blurred)
 
     # Now apply Canny edge detection
