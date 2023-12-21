@@ -144,7 +144,7 @@ def homomorphic_filter(img):
 def brighten_light_areas(gray_img):
     filtered_image = homomorphic_filter(gray_img)
     # Define a strict threshold
-    strict_threshold = 15  # Pixels with values below this will be black, above will be white
+    strict_threshold = 5  # Pixels with values below this will be black, above will be white
 
     # Apply the strict thresholding
     _, thresholded_img = cv2.threshold(filtered_img, strict_threshold, 255, cv2.THRESH_BINARY)
