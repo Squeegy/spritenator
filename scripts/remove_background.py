@@ -122,15 +122,20 @@ def isolate_object(img):
         open_cv_image = cv2.merge((open_cv_image, alpha_channel))  # Add the alpha channel
 
     gray = cv2.cvtColor(open_cv_image.copy(), cv2.COLOR_BGR2GRAY)
-    edges = cv2.Canny(gray, 200, 300)
+
+    checkpoint = copy.deepcopy(initial_mask)
+
+    # Apply Gaussian blur
+    blurred = cv2.GaussianBlur(gray, (5, 5), 0)
+
+    # Now apply Canny edge detection
+    edges = cv2.Canny(blurred, 150, 250)
 
     contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
     # Create an initial mask with contour edges
     initial_mask = np.zeros_like(gray)
     cv2.drawContours(initial_mask, contours, -1, 255, thickness=2)
-
-    checkpoint = copy.deepcopy(initial_mask)
 
     # Define the kernel size for the morphological operations
     kernel_size = 3
