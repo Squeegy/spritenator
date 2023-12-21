@@ -304,6 +304,14 @@ def isolate_foreground(img, near_black_threshold=30):
     kernel = square(kernel_size)
     closed_mask = binary_closing(near_black_mask, kernel)
 
+    # Ensure the closed_mask is in the correct format
+    if closed_mask.dtype != np.uint8:
+        closed_mask = closed_mask.astype(np.uint8)
+
+    # Check if closed_mask is not empty
+    if closed_mask.size == 0:
+        raise ValueError("Closed mask is empty. Check the input image and parameters.") 
+
     # Invert the closed mask for flood fill
     invert_closed_mask = cv2.bitwise_not(closed_mask)
 
