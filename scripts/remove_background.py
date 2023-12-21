@@ -224,7 +224,7 @@ def isolate_object(img):
     mask_pil = Image.fromarray(cv2.cvtColor(checkpoint, cv2.COLOR_BGRA2RGBA))
     return result_pil, mask_pil
 
-def estimate_kernel_size(near_black_mask, noise_threshold=10, scale_factor=4):
+def estimate_kernel_size(near_black_mask, noise_threshold=10, scale_factor=3):
     """
     Estimates the kernel size for morphological operations based on scanning for the smallest
     continuous line of the black outline that's above a noise threshold.
