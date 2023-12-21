@@ -269,7 +269,7 @@ def estimate_kernel_size(near_black_mask, noise_threshold=10, scale_factor=3):
 
     return kernel_size
 
-def isolate_foreground(img, near_black_threshold=30, kernel_size=5):
+def isolate_foreground(img, near_black_threshold=30):
     """
     Isolates the foreground from an image based on near-black edge detection.
 
@@ -298,36 +298,28 @@ def isolate_foreground(img, near_black_threshold=30, kernel_size=5):
 
     # Create a mask for near black pixels
     near_black_mask = cv2.inRange(gray, 0, near_black_threshold)
+
     # Perform morphological closing to close gaps in the mask
     kernel_size = estimate_kernel_size(near_black_mask)
-    print(kernel_size)
     kernel = square(kernel_size)
     closed_mask = binary_closing(near_black_mask, kernel)
-    checkpoint = copy.deepcopy(closed_mask)
-    # Edge detection on the near black mask
-    edges = cv2.Canny(near_black_mask, 100, 200)
 
-    # Perform morphological closing
-    kernel = np.ones((kernel_size, kernel_size), np.uint8)
-    closed_edges = cv2.morphologyEx(edges, cv2.MORPH_CLOSE, kernel)
+    # Invert the closed mask for flood fill
+    invert_closed_mask = cv2.bitwise_not(closed_mask)
 
-    # Invert the closed edges for flood fill
-    invert_closed_edges = cv2.bitwise_not(closed_edges)
+    # Use flood fill from the corners of the image
+    h, w = invert_closed_mask.shape[:2]
+    flood_fill_mask = np.zeros((h + 2, w + 2), np.uint8)
+    for corner in [(0,0), (0, w-1), (h-1, 0), (h-1, w-1)]:
+        cv2.floodFill(invert_closed_mask, flood_fill_mask, corner, 255)
 
-    # Flood fill from the corner
-    h, w = invert_closed_edges.shape[:2]
-    mask = np.zeros((h+2, w+2), np.uint8)
-    cv2.floodFill(invert_closed_edges, mask, (0,0), 255)
-
-    # Invert back to get the foreground mask
-    foreground_mask = cv2.bitwise_not(invert_closed_edges)
+    # Invert back to get the filled foreground mask
+    filled_foreground_mask = cv2.bitwise_not(invert_closed_mask)
 
     # Apply the mask to isolate the foreground
-    foreground_mask = cv2.threshold(foreground_mask, 1, 255, cv2.THRESH_BINARY)[1]
-    result = cv2.bitwise_and(open_cv_image, open_cv_image, mask=foreground_mask)
+    result = cv2.bitwise_and(open_cv_image, open_cv_image, mask=filled_foreground_mask)
 
     result_pil = Image.fromarray(cv2.cvtColor(result, cv2.COLOR_BGRA2RGBA))
-    mask_pil = Image.fromarray(checkpoint)
-    return result_pil, mask_pil
+    mask_pil = Image.fromarray(filled_foreground_mask)
 
-    return result
+    return result_pil, mask_pil
