@@ -180,29 +180,29 @@ def isolate_foreground(img, near_black_threshold=30):
     checkpoint = fill_inside_pixels(closed_mask)
     #checkpoint = copy.deepcopy(closed_mask)
 
-    closed_mask = close_gaps(closed_mask, kernel_size)
+    # closed_mask = close_gaps(closed_mask, kernel_size)
 
-    # Ensure the closed_mask is in the correct format
-    if closed_mask.dtype != np.uint8:
-        closed_mask = closed_mask.astype(np.uint8)
+    # # Ensure the closed_mask is in the correct format
+    # if closed_mask.dtype != np.uint8:
+    #     closed_mask = closed_mask.astype(np.uint8)
 
-    # Invert the closed mask for flood fill
-    invert_closed_mask = cv2.bitwise_not(closed_mask)
+    # # Invert the closed mask for flood fill
+    # invert_closed_mask = cv2.bitwise_not(closed_mask)
 
-    # Use flood fill from the corners of the image
-    h, w = invert_closed_mask.shape[:2]
-    flood_fill_mask = np.zeros((h + 2, w + 2), np.uint8)
-    for corner in [(0,0), (0, w-1), (h-1, 0), (h-1, w-1)]:
-        cv2.floodFill(invert_closed_mask, flood_fill_mask, corner, 255)
+    # # Use flood fill from the corners of the image
+    # h, w = invert_closed_mask.shape[:2]
+    # flood_fill_mask = np.zeros((h + 2, w + 2), np.uint8)
+    # for corner in [(0,0), (0, w-1), (h-1, 0), (h-1, w-1)]:
+    #     cv2.floodFill(invert_closed_mask, flood_fill_mask, corner, 255)
 
-    # Invert back to get the filled foreground mask
-    filled_foreground_mask = cv2.bitwise_not(invert_closed_mask)
+    # # Invert back to get the filled foreground mask
+    # filled_foreground_mask = cv2.bitwise_not(invert_closed_mask)
 
-    # Apply the mask to isolate the foreground
-    result = cv2.bitwise_and(open_cv_image, open_cv_image, mask=filled_foreground_mask)
+    # # Apply the mask to isolate the foreground
+    # result = cv2.bitwise_and(open_cv_image, open_cv_image, mask=filled_foreground_mask)
 
     # Convert the result and mask to PIL images
-    result_pil = Image.fromarray(cv2.cvtColor(result, cv2.COLOR_BGRA2RGBA))
+    result_pil = Image.fromarray(checkpoint)
     mask_pil = Image.fromarray(checkpoint)
 
     return result_pil, mask_pil
