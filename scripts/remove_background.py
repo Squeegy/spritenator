@@ -8,48 +8,76 @@ import copy
 import os
 import itertools
 
-def fill_between_white_pixels(line):
+def find_inside_candidates(line):
     """
-    Fill in all pixels between two white pixels in a given line.
+    Find 'inside candidates' in a line by scanning from the edges towards the center.
 
     Args:
     - line (numpy.ndarray): A single row or column from the mask image.
 
     Returns:
-    - numpy.ndarray: The modified line with pixels filled between white pixels.
+    - numpy.ndarray: An array marking 'inside candidates.'
     """
-    filled_line = line.copy()
-    start = end = None
-    for i in range(len(line)):
-        if line[i] == 255:  # White pixel found
-            if start is None:
-                start = i
-            else:
-                end = i
-                # Fill in between
-                filled_line[start:end+1] = 255
-                start = i  # Reset start for next segment
-    return filled_line
+    left_scan = np.zeros_like(line)
+    right_scan = np.zeros_like(line)
 
-def fill_mask(mask):
+    # Scan from left to right
+    for i in range(len(line)):
+        if line[i] == 255:
+            left_scan[:i] = 1
+            break
+
+    # Scan from right to left
+    for i in reversed(range(len(line))):
+        if line[i] == 255:
+            right_scan[i:] = 1
+            break
+
+    # Mark 'inside candidates'
+    inside_candidates = np.bitwise_and(left_scan, right_scan)
+
+    return inside_candidates
+
+def find_inside_pixels(mask):
     """
-    Apply the fill_between_white_pixels operation across the entire mask.
+    Find valid 'inside pixels' by intersecting horizontal and vertical inside candidates.
 
     Args:
     - mask (numpy.ndarray): The mask image.
 
     Returns:
-    - numpy.ndarray: The mask after filling between white pixels.
+    - numpy.ndarray: An array marking valid 'inside pixels.'
     """
+    height, width = mask.shape
+    horizontal_candidates = np.zeros_like(mask)
+    vertical_candidates = np.zeros_like(mask)
+
+    # Find horizontal inside candidates
+    for y in range(height):
+        horizontal_candidates[y, :] = find_inside_candidates(mask[y, :])
+
+    # Find vertical inside candidates
+    for x in range(width):
+        vertical_candidates[:, x] = find_inside_candidates(mask[:, x])
+
+    # Intersection of horizontal and vertical candidates
+    inside_pixels = np.bitwise_and(horizontal_candidates, vertical_candidates)
+
+    return inside_pixels
+
+def fill_inside_pixels(mask):
+    """
+    Fill the inside pixels of the mask.
+
+    Args:
+    - mask (numpy.ndarray): The mask image.
+
+    Returns:
+    - numpy.ndarray: The mask after filling the inside pixels.
+    """
+    inside_pixels = find_inside_pixels(mask)
     filled_mask = mask.copy()
-
-    # Apply horizontally
-    for y in range(mask.shape[0]):
-        filled_mask[y, :] = fill_between_white_pixels(mask[y, :])
-
-    # Apply vertically
-    for x in range(mask.shape[1]):
-        filled_mask[:, x] = fill_between_white_pixels(mask[:, x])
+    filled_mask[inside_pixels == 1] = 255
 
     return filled_mask
 
@@ -149,7 +177,7 @@ def isolate_foreground(img, near_black_threshold=30):
     kernel_size = estimate_kernel_size(near_black_mask)
     kernel = square(kernel_size)
     closed_mask = binary_closing(closed_mask, kernel)
-    checkpoint = fill_mask(closed_mask)
+    checkpoint = fill_inside_pixels(closed_mask)
     #checkpoint = copy.deepcopy(closed_mask)
 
     closed_mask = close_gaps(closed_mask, kernel_size)
