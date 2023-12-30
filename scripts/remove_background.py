@@ -2,11 +2,35 @@ import numpy as np
 from skimage.color import rgb2lab
 from skimage.measure import label
 from skimage.morphology import binary_opening, binary_closing, remove_small_objects, square
+import matplotlib.pyplot as plt
 from PIL import Image
 import cv2
 import copy
 import os
 import itertools
+
+def visualize_candidates(horizontal_candidates, vertical_candidates, inside_pixels):
+    """
+    Visualize horizontal, vertical candidates, and their intersection.
+
+    Args:
+    - horizontal_candidates (numpy.ndarray): Array of horizontal candidates.
+    - vertical_candidates (numpy.ndarray): Array of vertical candidates.
+    - inside_pixels (numpy.ndarray): Array of valid inside pixels.
+
+    """
+    # Initialize an RGB image
+    vis_image = np.zeros((*horizontal_candidates.shape, 3), dtype=np.uint8)
+
+    # Set colors: Red for horizontal, Blue for vertical, Purple for intersection
+    vis_image[horizontal_candidates == 1] = [255, 0, 0]  # Red
+    vis_image[vertical_candidates == 1] = [0, 0, 255]  # Blue
+    vis_image[inside_pixels == 1] = [255, 0, 255]  # Purple
+
+    plt.imshow(vis_image)
+    plt.title("Candidate Visualization")
+    # Save the plot to a file
+    plt.savefig('myplot.png')
 
 def find_inside_candidates(line):
     """
@@ -23,19 +47,18 @@ def find_inside_candidates(line):
 
     # Scan from left to right
     for i in range(len(line)):
-        if line[i] == 255:
-            left_scan[:i] = 1
+        if line[i]:
+            left_scan[i:] = 1
             break
 
     # Scan from right to left
     for i in reversed(range(len(line))):
-        if line[i] == 255:
-            right_scan[i:] = 1
+        if line[i]:
+            right_scan[:i] = 1
             break
 
     # Mark 'inside candidates'
     inside_candidates = np.bitwise_and(left_scan, right_scan)
-
     return inside_candidates
 
 def find_inside_pixels(mask):
@@ -62,7 +85,8 @@ def find_inside_pixels(mask):
 
     # Intersection of horizontal and vertical candidates
     inside_pixels = np.bitwise_and(horizontal_candidates, vertical_candidates)
-
+    visualize_candidates(horizontal_candidates, vertical_candidates, inside_pixels)
+    
     return inside_pixels
 
 def fill_inside_pixels(mask):
@@ -124,27 +148,56 @@ def estimate_kernel_size(near_black_mask, noise_threshold=10, scale_factor=1.5):
     if kernel_size % 2 == 0:
         kernel_size += 1
 
-    return kernel_size
+    return kernel_size, min_line_length + 2 #return kernel and block with buffer
 
-def close_gaps_in_line(line, max_gap_size):
-    new_line = line.copy()
-    for i in range(1, len(line) - max_gap_size):
-        if line[i] == 0 and all(line[i + j] == 255 for j in range(1, max_gap_size + 1)):
-            new_line[i:i + max_gap_size] = 255
-    return new_line
+def close_gaps_in_line(line, gap_size_threshold):
+    """
+    Close small gaps within a line.
 
-def close_gaps(mask, max_gap_size):
+    Args:
+    - line (numpy.ndarray): A single row or column from the mask.
+    - gap_size_threshold (int): Maximum size of gaps to close.
+
+    Returns:
+    - numpy.ndarray: The line after closing small gaps.
+    """
+    closed_line = line.copy()
+    gap_start = None
+
+    for i in range(1, len(line)):
+        if line[i] and not line[i-1]:  # End of a gap
+            if gap_start is not None and (i - gap_start) <= gap_size_threshold:
+                # Close the gap
+                closed_line[gap_start:i] = 1
+                gap_start = None
+        elif not line[i] and line[i-1]:  # Start of a gap
+            gap_start = i
+
+    return closed_line
+
+def close_gaps(mask, gap_size_threshold):
+    """
+    Close small gaps in a mask.
+
+    Args:
+    - mask (numpy.ndarray): The binary mask.
+    - gap_size_threshold (int): Maximum size of gaps to close.
+
+    Returns:
+    - numpy.ndarray: The mask after closing gaps.
+    """
     height, width = mask.shape
+    closed_mask = mask.copy()
 
     # Close gaps horizontally
     for y in range(height):
-        mask[y, :] = close_gaps_in_line(mask[y, :], max_gap_size)
+        closed_mask[y, :] = close_gaps_in_line(mask[y, :], gap_size_threshold)
 
     # Close gaps vertically
     for x in range(width):
-        mask[:, x] = close_gaps_in_line(mask[:, x], max_gap_size)
+        closed_mask[:, x] = close_gaps_in_line(closed_mask[:, x], gap_size_threshold)
 
-    return mask
+    return closed_mask
 
 def isolate_foreground(img, near_black_threshold=30):
     """
@@ -174,35 +227,30 @@ def isolate_foreground(img, near_black_threshold=30):
 
     # Perform iterative morphological closing
     closed_mask = near_black_mask
-    kernel_size = estimate_kernel_size(near_black_mask)
+    kernel_size, block_size = estimate_kernel_size(near_black_mask)
     kernel = square(kernel_size)
     closed_mask = binary_closing(closed_mask, kernel)
-    checkpoint = fill_inside_pixels(closed_mask)
-    #checkpoint = copy.deepcopy(closed_mask)
+    closed_mask = fill_inside_pixels(closed_mask)
+    # Close gaps in the checkpoint mask
+    
+    closed_mask = close_gaps(closed_mask, kernel_size)
 
-    # closed_mask = close_gaps(closed_mask, kernel_size)
+    # Ensure the closed_mask is in the correct format
+    if closed_mask.dtype != np.uint8:
+        closed_mask = closed_mask.astype(np.uint8)
 
-    # # Ensure the closed_mask is in the correct format
-    # if closed_mask.dtype != np.uint8:
-    #     closed_mask = closed_mask.astype(np.uint8)
 
-    # # Invert the closed mask for flood fill
-    # invert_closed_mask = cv2.bitwise_not(closed_mask)
+    # Apply the mask to isolate the foreground
+    result = cv2.bitwise_and(open_cv_image, open_cv_image, mask=closed_mask)
 
-    # # Use flood fill from the corners of the image
-    # h, w = invert_closed_mask.shape[:2]
-    # flood_fill_mask = np.zeros((h + 2, w + 2), np.uint8)
-    # for corner in [(0,0), (0, w-1), (h-1, 0), (h-1, w-1)]:
-    #     cv2.floodFill(invert_closed_mask, flood_fill_mask, corner, 255)
+    # Convert the mask to an alpha channel
+    alpha_channel = 255 - closed_mask  # Inverts the mask to create transparency
 
-    # # Invert back to get the filled foreground mask
-    # filled_foreground_mask = cv2.bitwise_not(invert_closed_mask)
+    # Add the alpha channel to the result
+    result_with_alpha = cv2.cvtColor(result, cv2.COLOR_BGR2RGB)  # Convert to RGB
+    result_with_alpha = np.dstack((result_with_alpha, alpha_channel))  # Add alpha channel
 
-    # # Apply the mask to isolate the foreground
-    # result = cv2.bitwise_and(open_cv_image, open_cv_image, mask=filled_foreground_mask)
+    # Convert to PIL Image
+    result_pil = Image.fromarray(result_with_alpha)
 
-    # Convert the result and mask to PIL images
-    result_pil = Image.fromarray(checkpoint)
-    mask_pil = Image.fromarray(checkpoint)
-
-    return result_pil, mask_pil
+    return result_pil
